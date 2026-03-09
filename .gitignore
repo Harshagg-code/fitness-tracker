@@ -1,0 +1,7 @@
+node_modules/
+backend/.env
+frontend/vite-project/.env
+.env
+dist/
+build/
+.DS_Store
