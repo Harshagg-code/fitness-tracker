@@ -3,7 +3,9 @@ import { AuthProvider, useAuth } from "./context/AuthContext"
 import HomePage from "./pages/HomePage"
 import LoginPage from "./pages/LoginPage"
 import RegisterPage from "./pages/RegisterPage"
-import ProfilePage from "./pages/ProfilePage"  // 🆕
+import ProfilePage from "./pages/ProfilePage"
+import WeeklyPage from "./pages/WeeklyPage"
+import MealsPage from "./pages/MealsPage"
 
 const ProtectedRoute = ({ children }) => {
   const { user } = useAuth()
@@ -15,6 +17,11 @@ const AppRoutes = () => {
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route path="/weekly" element={
+        <ProtectedRoute>
+          <WeeklyPage />
+        </ProtectedRoute>
+      } />
       <Route path="/" element={
         <ProtectedRoute>
           <HomePage />
@@ -23,6 +30,11 @@ const AppRoutes = () => {
       <Route path="/profile" element={
         <ProtectedRoute>
           <ProfilePage />
+        </ProtectedRoute>
+      } />
+      <Route path="/meals" element={
+        <ProtectedRoute>
+          <MealsPage />
         </ProtectedRoute>
       } />
     </Routes>

@@ -21,10 +21,13 @@ const HomePage = () => {
     const [chatInput, setChatInput] = useState("")
     const [chatLoading, setChatLoading] = useState(false)
     const [glasses, setGlasses] = useState(0)
-    const [currentWeight, setCurrentWeight] = useState(null)
-    const [goalWeight, setGoalWeight] = useState(null)
-    const [weightInput, setWeightInput] = useState("")
     const [weightHistory, setWeightHistory] = useState([])
+    const [startingWeight, setStartingWeight] = useState(null)
+    const [activeTab, setActiveTab] = useState("search") // "search" or "meals"
+    const [savedMeals, setSavedMeals] = useState([])
+    const [pendingMeal, setPendingMeal] = useState(null)
+    const [weightInput, setWeightInput] = useState("")
+    const [dailyWeightInput, setDailyWeightInput] = useState("")
     const GOAL = 8
     const { accessToken, refreshAccessToken, logout, user } = useAuth()
     const navigate = useNavigate()
@@ -33,6 +36,7 @@ const HomePage = () => {
         fetchLogs()
         fetchWater()
         fetchWeight()
+        fetchSavedMeals()
     }, [])
 
     const getAuthHeaders = () => ({
@@ -65,15 +69,9 @@ const HomePage = () => {
 
     const fetchWeight = async () => {
         try {
-            const [historyRes, goalRes] = await Promise.all([
-                axios.get("http://localhost:5001/api/weight/history", getAuthHeaders()),
-                axios.get("http://localhost:5001/api/weight/goal", getAuthHeaders())
-            ])
-            setWeightHistory(historyRes.data)
-            setGoalWeight(goalRes.data.goalWeight)
-            if (historyRes.data.length > 0) {
-                setCurrentWeight(historyRes.data[historyRes.data.length - 1].weight)
-            }
+            const res = await axios.get("http://localhost:5001/api/weight/history", getAuthHeaders())
+            setWeightHistory(res.data.dailyLogs || [])
+            setStartingWeight(res.data.startingWeight)
         } catch (error) {
             console.error("Error fetching weight", error)
         }
@@ -142,27 +140,24 @@ const HomePage = () => {
         }
     }
 
-    const handleLogWeight = async () => {
+    const handleSetStartingWeight = async () => {
         if (!weightInput) return
         try {
-            await axios.post("http://localhost:5001/api/weight", { weight: parseFloat(weightInput) }, getAuthHeaders())
-            setCurrentWeight(parseFloat(weightInput))
+            await axios.post("http://localhost:5001/api/weight/start", { weight: parseFloat(weightInput) }, getAuthHeaders())
+            toast.success("Starting weight set!")
             setWeightInput("")
-            toast.success("Weight logged!")
-            fetchWeight()
+            await fetchWeight()
         } catch (error) {
-            toast.error("Failed to log weight")
+            toast.error("Starting weight already set — reset history to change it")
         }
     }
 
-    const handleSetGoalWeight = async (goal) => {
-        if (!goal) return
+    const fetchSavedMeals = async () => {
         try {
-            await axios.post("http://localhost:5001/api/weight/goal", { goalWeight: parseFloat(goal) }, getAuthHeaders())
-            setGoalWeight(parseFloat(goal))
-            toast.success("Goal weight set!")
+            const res = await axios.get("http://localhost:5001/api/saved-meals", getAuthHeaders())
+            setSavedMeals(res.data)
         } catch (error) {
-            toast.error("Failed to set goal weight")
+            console.error("Error fetching saved meals", error)
         }
     }
 
@@ -218,6 +213,9 @@ const HomePage = () => {
                     <button onClick={() => navigate("/profile")} className="btn btn-ghost btn-sm">
                         My Profile
                     </button>
+                    <button onClick={() => navigate("/meals")} className="btn btn-ghost btn-sm">
+                        My Meals
+                    </button>
                     <button onClick={logout} className="btn btn-error btn-sm btn-outline">
                         Logout
                     </button>
@@ -225,29 +223,107 @@ const HomePage = () => {
             </div>
 
             <div className="max-w-6xl mx-auto px-4 py-8 flex flex-col gap-6">
-
-                {/* Search */}
+                {/* Search / My Meals Tabs */}
                 <div className="card bg-base-100 shadow-sm">
                     <div className="card-body">
-                        <h2 className="card-title text-sm uppercase tracking-widest text-base-content/50 font-bold">Search Food</h2>
-                        <div className="flex gap-2 mt-1">
-                            <input
-                                type="text"
-                                value={query}
-                                onChange={(e) => setQuery(e.target.value)}
-                                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                                placeholder="e.g. 2 eggs and 1 cup rice..."
-                                className="input input-bordered flex-1"
-                            />
-                            <button onClick={handleSearch} className={`btn btn-primary ${loading ? "loading" : ""}`}>
-                                {loading ? "" : <><Search className="w-4 h-4 mr-1" /> Search</>}
+                        {/* Tabs */}
+                        <div className="flex gap-2 mb-4">
+                            <button
+                                onClick={() => setActiveTab("search")}
+                                className={`btn btn-sm ${activeTab === "search" ? "btn-primary" : "btn-ghost"}`}
+                            >
+                                <Search className="w-4 h-4 mr-1" /> Search Food
+                            </button>
+                            <button
+                                onClick={() => setActiveTab("meals")}
+                                className={`btn btn-sm ${activeTab === "meals" ? "btn-primary" : "btn-ghost"}`}
+                            >
+                                My Meals
                             </button>
                         </div>
+
+                        {/* Search Tab */}
+                        {activeTab === "search" && (
+                            <div className="flex gap-2">
+                                <input
+                                    type="text"
+                                    value={query}
+                                    onChange={(e) => setQuery(e.target.value)}
+                                    onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                                    placeholder="e.g. 2 eggs and 1 cup rice..."
+                                    className="input input-bordered flex-1"
+                                />
+                                <button onClick={handleSearch} className={`btn btn-primary ${loading ? "loading" : ""}`}>
+                                    {loading ? "" : <><Search className="w-4 h-4 mr-1" /> Search</>}
+                                </button>
+                            </div>
+                        )}
+
+                        {/* My Meals Tab */}
+                        {activeTab === "meals" && (
+                            <div className="flex flex-col gap-3">
+                                {savedMeals.length === 0 ? (
+                                    <div className="text-center py-6">
+                                        <p className="text-base-content/40 text-sm">No saved meals yet</p>
+                                        <button onClick={() => navigate("/meals")} className="btn btn-primary btn-xs mt-2">
+                                            Create a meal →
+                                        </button>
+                                    </div>
+                                ) : (
+                                    savedMeals.map((meal) => (
+                                        <div key={meal._id} className="flex justify-between items-center p-3 bg-base-200 rounded-xl">
+                                            <div>
+                                                <p className="font-semibold text-sm">{meal.name}</p>
+                                                <p className="text-xs text-base-content/50">
+                                                    {meal.totalCalories.toFixed(0)} kcal · P: {meal.totalProtein.toFixed(1)}g · C: {meal.totalCarbs.toFixed(1)}g · F: {meal.totalFat.toFixed(1)}g
+                                                </p>
+                                            </div>
+                                            {pendingMeal?._id === meal._id ? (
+                                                <div className="flex flex-col gap-1">
+                                                    <p className="text-xs text-base-content/50">Add to:</p>
+                                                    <div className="grid grid-cols-2 gap-1">
+                                                        {["breakfast", "lunch", "snacks", "dinner"].map((mealType) => (
+                                                            <button
+                                                                key={mealType}
+                                                                onClick={async () => {
+                                                                    await axios.post("http://localhost:5001/api/logs", {
+                                                                        name: meal.name,
+                                                                        calories: meal.totalCalories,
+                                                                        protein: meal.totalProtein,
+                                                                        carbs: meal.totalCarbs,
+                                                                        fat: meal.totalFat,
+                                                                        mealType
+                                                                    }, getAuthHeaders())
+                                                                    toast.success(`${meal.name} added to ${mealType}!`)
+                                                                    setPendingMeal(null)
+                                                                    fetchLogs()
+                                                                }}
+                                                                className="btn btn-xs btn-outline btn-primary capitalize"
+                                                            >
+                                                                {mealType}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                    <button onClick={() => setPendingMeal(null)} className="btn btn-xs btn-ghost">Cancel</button>
+                                                </div>
+                                            ) : (
+                                                <button onClick={() => setPendingMeal(meal)} className="btn btn-primary btn-xs">
+                                                    + Add
+                                                </button>
+                                            )}
+                                        </div>
+                                    ))
+                                )}
+                                <button onClick={() => navigate("/meals")} className="btn btn-ghost btn-xs self-end">
+                                    Manage meals →
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
 
-                {/* Search Results */}
-                {foods.length > 0 && (
+                {/* Search Results — only show in search tab */}
+                {activeTab === "search" && foods.length > 0 && (
                     <div className="flex flex-col gap-3">
                         <h2 className="text-sm uppercase tracking-widest text-base-content/50 font-bold px-1">Results</h2>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -521,86 +597,108 @@ const HomePage = () => {
                         {/* Weight Tracker */}
                         <div className="card bg-base-100 shadow-sm">
                             <div className="card-body py-4 px-5">
-                                <h2 className="text-sm uppercase tracking-widest text-base-content/50 font-bold mb-3">Weight Tracker</h2>
                                 <div className="flex justify-between items-center mb-4">
-                                    <div className="text-center">
-                                        <p className="text-xs text-base-content/40 mb-1">Current</p>
-                                        <p className="text-2xl font-bold text-primary">
-                                            {currentWeight ? `${currentWeight}kg` : "—"}
-                                        </p>
-                                    </div>
-                                    <div className="flex flex-col items-center">
-                                        {currentWeight && goalWeight && (
-                                            <>
-                                                <p className="text-xs text-base-content/40 mb-1">
-                                                    {currentWeight > goalWeight ? "To lose" : currentWeight < goalWeight ? "To gain" : ""}
-                                                </p>
-                                                <p className={`text-lg font-bold ${currentWeight > goalWeight ? "text-error" : "text-success"}`}>
-                                                    {Math.abs(currentWeight - goalWeight).toFixed(1)}kg
-                                                </p>
-                                                <p className="text-xs mt-1">
-                                                    {currentWeight === goalWeight ? "🎉 Goal reached!" :
-                                                        currentWeight > goalWeight ? "↓ to lose" : "↑ to gain"}
-                                                </p>
-                                            </>
+                                    <h2 className="text-sm uppercase tracking-widest text-base-content/50 font-bold">Weight Tracker</h2>
+                                    <span
+                                        className="text-xs text-error/40 cursor-pointer hover:text-error"
+                                        onClick={async () => {
+                                            await axios.delete("http://localhost:5001/api/weight/reset", getAuthHeaders())
+                                            setWeightHistory([])
+                                            setStartingWeight(null)
+                                            toast.success("Weight history cleared")
+                                        }}
+                                    >
+                                        Reset
+                                    </span>
+                                </div>
+
+                                {/* Stats row */}
+                                <div className="flex items-center justify-between gap-2 mb-4">
+                                    {/* Starting */}
+                                    <div className="text-center flex-1">
+                                        <p className="text-xs text-base-content/40 uppercase tracking-widest mb-1">Starting</p>
+                                        {startingWeight ? (
+                                            <p className="text-2xl font-bold">{startingWeight.weight}kg</p>
+                                        ) : (
+                                            <p className="text-sm text-base-content/30">Not set</p>
                                         )}
                                     </div>
-                                    <div className="text-center">
-                                        <p className="text-xs text-base-content/40 mb-1">Goal</p>
-                                        <p className="text-2xl font-bold text-base-content/50">
-                                            {goalWeight ? `${goalWeight}kg` : "—"}
-                                        </p>
+
+                                    {/* Diff */}
+                                    <div className="text-center flex-1">
+                                        {startingWeight && weightHistory.length > 0 ? (
+                                            <>
+                                                <p className={`text-lg font-bold ${weightHistory[weightHistory.length - 1].weight < startingWeight.weight
+                                                    ? "text-success" : "text-error"
+                                                    }`}>
+                                                    {weightHistory[weightHistory.length - 1].weight < startingWeight.weight ? "↓" : "↑"}
+                                                    {Math.abs(weightHistory[weightHistory.length - 1].weight - startingWeight.weight).toFixed(1)}kg
+                                                </p>
+                                                <p className="text-xs text-base-content/40">
+                                                    {weightHistory[weightHistory.length - 1].weight < startingWeight.weight ? "lost" : "gained"}
+                                                </p>
+                                            </>
+                                        ) : (
+                                            <p className="text-base-content/20">→</p>
+                                        )}
+                                    </div>
+
+                                    {/* Current */}
+                                    <div className="text-center flex-1">
+                                        <p className="text-xs text-base-content/40 uppercase tracking-widest mb-1">Current</p>
+                                        {weightHistory.length > 0 ? (
+                                            <p className="text-2xl font-bold text-primary">{weightHistory[weightHistory.length - 1].weight}kg</p>
+                                        ) : (
+                                            <p className="text-sm text-base-content/30">Not logged</p>
+                                        )}
                                     </div>
                                 </div>
 
-                                <div className="flex gap-2">
-                                    <input
-                                        type="number"
-                                        value={weightInput}
-                                        onChange={(e) => setWeightInput(e.target.value)}
-                                        placeholder="Today's weight (kg)"
-                                        className="input input-bordered input-sm flex-1"
-                                    />
-                                    <button onClick={handleLogWeight} className="btn btn-primary btn-sm">Log</button>
-                                </div>
-
-                                {!goalWeight && (
-                                    <div className="flex gap-2 mt-2">
+                                {/* Input row */}
+                                {!startingWeight ? (
+                                    <div className="flex gap-2">
                                         <input
                                             type="number"
-                                            id="goalInput"
-                                            placeholder="Set goal weight (kg)"
+                                            step="0.1"
+                                            value={weightInput}
+                                            onChange={(e) => setWeightInput(e.target.value)}
+                                            placeholder="Starting weight (kg)"
+                                            className="input input-bordered input-sm flex-1"
+                                        />
+                                        <button onClick={handleSetStartingWeight} className="btn btn-primary btn-sm">
+                                            Set
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="number"
+                                            step="0.1"
+                                            value={dailyWeightInput}
+                                            onChange={(e) => setDailyWeightInput(e.target.value)}
+                                            placeholder="Log today's weight (kg)"
                                             className="input input-bordered input-sm flex-1"
                                         />
                                         <button
-                                            onClick={() => handleSetGoalWeight(document.getElementById("goalInput").value)}
-                                            className="btn btn-outline btn-sm"
+                                            onClick={async () => {
+                                                if (!dailyWeightInput) return
+                                                await axios.post("http://localhost:5001/api/weight", { weight: parseFloat(dailyWeightInput) }, getAuthHeaders())
+                                                toast.success("Weight logged!")
+                                                setDailyWeightInput("")
+                                                fetchWeight()
+                                            }}
+                                            className="btn btn-primary btn-sm"
                                         >
-                                            Set Goal
+                                            Log
                                         </button>
                                     </div>
                                 )}
 
-                                {weightHistory.length >= 2 && (
-                                    <div className="mt-3 pt-3 border-t border-base-200">
-                                        <p className="text-xs text-base-content/40">
-                                            Since you started:{" "}
-                                            <span className={`font-semibold ${weightHistory[weightHistory.length - 1].weight < weightHistory[0].weight
-                                                ? "text-success"
-                                                : weightHistory[weightHistory.length - 1].weight > weightHistory[0].weight
-                                                    ? "text-error"
-                                                    : "text-warning"
-                                                }`}>
-                                                {weightHistory[weightHistory.length - 1].weight < weightHistory[0].weight ? "↓ " : "↑ "}
-                                                {Math.abs(weightHistory[weightHistory.length - 1].weight - weightHistory[0].weight).toFixed(1)}kg
-                                                {weightHistory[weightHistory.length - 1].weight < weightHistory[0].weight ? " lost" : " gained"}
-                                            </span>
-                                        </p>
-                                    </div>
-                                )}
+                                <span className="text-xs text-primary cursor-pointer mt-2" onClick={() => navigate("/weekly")}>
+                                    See full trend →
+                                </span>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </div>

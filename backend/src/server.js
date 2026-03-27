@@ -9,6 +9,7 @@ import profileRoutes from "./routes/profileRoutes.js"
 import aiRoutes from "./routes/aiRoutes.js"
 import waterRoutes from "./routes/waterRoutes.js"
 import weightRoutes from "./routes/weightRoutes.js"
+import savedMealRoutes from "./routes/savedMealRoutes.js"
 
 
 
@@ -31,7 +32,7 @@ app.use("/api", profileRoutes)
 app.use("/api", aiRoutes)
 app.use("/api", waterRoutes)
 app.use("/api", weightRoutes)
-
+app.use("/api", savedMealRoutes)
 connectDB().then(() => {
     app.listen(PORT, () => {
         console.log("Server started on:", PORT);
