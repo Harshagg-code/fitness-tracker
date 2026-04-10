@@ -46,8 +46,8 @@ const HomePage = () => {
     const fetchLogs = async () => {
         try {
             const [logsRes, profileRes] = await Promise.all([
-                axios.get("https://fitness-tracker-y6q9.onrender.com//api/logs", getAuthHeaders()),
-                axios.get("https://fitness-tracker-y6q9.onrender.com//api/profile", getAuthHeaders())
+                axios.get("https://fitness-tracker-y6q9.onrender.com/api/logs", getAuthHeaders()),
+                axios.get("https://fitness-tracker-y6q9.onrender.com/api/profile", getAuthHeaders())
             ])
             setLogs(logsRes.data.logs)
             setGrouped(logsRes.data.grouped)
@@ -60,7 +60,7 @@ const HomePage = () => {
 
     const fetchWater = async () => {
         try {
-            const res = await axios.get("https://fitness-tracker-y6q9.onrender.com//api/water", getAuthHeaders())
+            const res = await axios.get("https://fitness-tracker-y6q9.onrender.com/api/water", getAuthHeaders())
             setGlasses(res.data.glasses)
         } catch (error) {
             console.error("Error fetching water", error)
@@ -69,7 +69,7 @@ const HomePage = () => {
 
     const fetchWeight = async () => {
         try {
-            const res = await axios.get("https://fitness-tracker-y6q9.onrender.com//api/weight/history", getAuthHeaders())
+            const res = await axios.get("https://fitness-tracker-y6q9.onrender.com/api/weight/history", getAuthHeaders())
             setWeightHistory(res.data.dailyLogs || [])
             setStartingWeight(res.data.startingWeight)
         } catch (error) {
@@ -82,7 +82,7 @@ const HomePage = () => {
         setLoading(true)
         try {
             const response = await axios.post(
-                "https://fitness-tracker-y6q9.onrender.com//api/nutrition",
+                "https://fitness-tracker-y6q9.onrender.com/api/nutrition",
                 { query },
                 { headers: { Authorization: `Bearer ${accessToken}` } }
             )
@@ -93,7 +93,7 @@ const HomePage = () => {
                 const newToken = await refreshAccessToken()
                 if (newToken) {
                     const response = await axios.post(
-                        "https://fitness-tracker-y6q9.onrender.com//api/nutrition",
+                        "https://fitness-tracker-y6q9.onrender.com/api/nutrition",
                         { query },
                         { headers: { Authorization: `Bearer ${newToken}` } }
                     )
@@ -110,7 +110,7 @@ const HomePage = () => {
 
     const handleAddToLog = async (food, mealType) => {
         try {
-            await axios.post("https://fitness-tracker-y6q9.onrender.com//api/logs", { ...food, mealType }, getAuthHeaders())
+            await axios.post("https://fitness-tracker-y6q9.onrender.com/api/logs", { ...food, mealType }, getAuthHeaders())
             toast.success(`${food.name} added to ${mealType}`)
             setPendingFood(null)
             setFoods([])
@@ -122,7 +122,7 @@ const HomePage = () => {
 
     const handleDeleteLog = async (id) => {
         try {
-            await axios.delete(`https://fitness-tracker-y6q9.onrender.com//api/logs/${id}`, getAuthHeaders())
+            await axios.delete(`https://fitness-tracker-y6q9.onrender.com/api/logs/${id}`, getAuthHeaders())
             toast.success("Removed from log")
             fetchLogs()
         } catch (error) {
@@ -133,7 +133,7 @@ const HomePage = () => {
     const handleGlassClick = async (index) => {
         const newGlasses = index < glasses ? index : index + 1
         try {
-            await axios.post("https://fitness-tracker-y6q9.onrender.com//api/water", { glasses: newGlasses }, getAuthHeaders())
+            await axios.post("https://fitness-tracker-y6q9.onrender.com/api/water", { glasses: newGlasses }, getAuthHeaders())
             setGlasses(newGlasses)
         } catch (error) {
             toast.error("Failed to update water")
@@ -143,7 +143,7 @@ const HomePage = () => {
     const handleSetStartingWeight = async () => {
         if (!weightInput) return
         try {
-            await axios.post("https://fitness-tracker-y6q9.onrender.com//api/weight/start", { weight: parseFloat(weightInput) }, getAuthHeaders())
+            await axios.post("https://fitness-tracker-y6q9.onrender.com/api/weight/start", { weight: parseFloat(weightInput) }, getAuthHeaders())
             toast.success("Starting weight set!")
             setWeightInput("")
             await fetchWeight()
@@ -154,7 +154,7 @@ const HomePage = () => {
 
     const fetchSavedMeals = async () => {
         try {
-            const res = await axios.get("https://fitness-tracker-y6q9.onrender.com//api/saved-meals", getAuthHeaders())
+            const res = await axios.get("https://fitness-tracker-y6q9.onrender.com/api/saved-meals", getAuthHeaders())
             setSavedMeals(res.data)
         } catch (error) {
             console.error("Error fetching saved meals", error)
@@ -170,7 +170,7 @@ const HomePage = () => {
         setChatLoading(true)
         try {
             const res = await axios.post(
-                "https://fitness-tracker-y6q9.onrender.com//api/ai/advice",
+                "https://fitness-tracker-y6q9.onrender.com/api/ai/advice",
                 { messages: updatedMessages },
                 getAuthHeaders()
             )
@@ -286,7 +286,7 @@ const HomePage = () => {
                                                             <button
                                                                 key={mealType}
                                                                 onClick={async () => {
-                                                                    await axios.post("https://fitness-tracker-y6q9.onrender.com//api/logs", {
+                                                                    await axios.post("https://fitness-tracker-y6q9.onrender.com/api/logs", {
                                                                         name: meal.name,
                                                                         calories: meal.totalCalories,
                                                                         protein: meal.totalProtein,
@@ -602,7 +602,7 @@ const HomePage = () => {
                                     <span
                                         className="text-xs text-error/40 cursor-pointer hover:text-error"
                                         onClick={async () => {
-                                            await axios.delete("https://fitness-tracker-y6q9.onrender.com//api/weight/reset", getAuthHeaders())
+                                            await axios.delete("https://fitness-tracker-y6q9.onrender.com/api/weight/reset", getAuthHeaders())
                                             setWeightHistory([])
                                             setStartingWeight(null)
                                             toast.success("Weight history cleared")
@@ -682,7 +682,7 @@ const HomePage = () => {
                                         <button
                                             onClick={async () => {
                                                 if (!dailyWeightInput) return
-                                                await axios.post("https://fitness-tracker-y6q9.onrender.com//api/weight", { weight: parseFloat(dailyWeightInput) }, getAuthHeaders())
+                                                await axios.post("https://fitness-tracker-y6q9.onrender.com/api/weight", { weight: parseFloat(dailyWeightInput) }, getAuthHeaders())
                                                 toast.success("Weight logged!")
                                                 setDailyWeightInput("")
                                                 fetchWeight()

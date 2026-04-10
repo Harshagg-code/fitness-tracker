@@ -28,9 +28,9 @@ const WeeklyPage = () => {
     const fetchWeeklyData = async () => {
         try {
             const [weekRes, weightRes, profileRes] = await Promise.all([
-                axios.get("https://fitness-tracker-y6q9.onrender.com//api/logs/week", getAuthHeaders()),
-                axios.get("https://fitness-tracker-y6q9.onrender.com//api/weight/history", getAuthHeaders()),
-                axios.get("https://fitness-tracker-y6q9.onrender.com//api/profile", getAuthHeaders()),
+                axios.get("https://fitness-tracker-y6q9.onrender.com/api/logs/week", getAuthHeaders()),
+                axios.get("https://fitness-tracker-y6q9.onrender.com/api/weight/history", getAuthHeaders()),
+                axios.get("https://fitness-tracker-y6q9.onrender.com/api/profile", getAuthHeaders()),
             ])
             setWeeklyLogs(weekRes.data)
             setWeightHistory(weightRes.data.dailyLogs || [])  // 👈 fallback to []
@@ -88,7 +88,7 @@ const WeeklyPage = () => {
                 - Weight history: ${weightHistory.slice(-7).map(w => `${w.date}: ${w.weight}kg`).join(", ")}
             `
             const res = await axios.post(
-                "https://fitness-tracker-y6q9.onrender.com//api/ai/advice",
+                "https://fitness-tracker-y6q9.onrender.com/api/ai/advice",
                 { messages: [{ role: "user", content: `Please give me a detailed weekly nutrition and fitness report based on this data: ${summary}` }] },
                 getAuthHeaders()
             )
