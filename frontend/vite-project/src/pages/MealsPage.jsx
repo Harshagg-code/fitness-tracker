@@ -24,7 +24,7 @@ const MealsPage = () => {
 
     const fetchSavedMeals = async () => {
         try {
-            const res = await axios.get("http://localhost:5001/api/saved-meals", getAuthHeaders())
+            const res = await axios.get("https://fitness-tracker-y6q9.onrender.com//api/saved-meals", getAuthHeaders())
             setSavedMeals(res.data)
         } catch (error) {
             console.error("Error fetching saved meals", error)
@@ -35,7 +35,7 @@ const MealsPage = () => {
         setSearching(true)
         try {
             const res = await axios.post(
-                "http://localhost:5001/api/nutrition",
+                "https://fitness-tracker-y6q9.onrender.com//api/nutrition",
                 { query },
                 getAuthHeaders()  // 👈 make sure this is the third argument
             )
@@ -62,7 +62,7 @@ const MealsPage = () => {
         if (!mealName.trim()) { toast.error("Give your meal a name!"); return }
         if (mealItems.length === 0) { toast.error("Add at least one item!"); return }
         try {
-            await axios.post("http://localhost:5001/api/saved-meals", {
+            await axios.post("https://fitness-tracker-y6q9.onrender.com//api/saved-meals", {
                 name: mealName,
                 items: mealItems
             }, getAuthHeaders())
@@ -78,7 +78,7 @@ const MealsPage = () => {
 
     const handleDeleteMeal = async (id) => {
         try {
-            await axios.delete(`http://localhost:5001/api/saved-meals/${id}`, getAuthHeaders())
+            await axios.delete(`https://fitness-tracker-y6q9.onrender.com//api/saved-meals/${id}`, getAuthHeaders())
             toast.success("Meal deleted")
             fetchSavedMeals()
         } catch (error) {
