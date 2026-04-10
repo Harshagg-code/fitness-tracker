@@ -21,8 +21,8 @@ const PORT = process.env.PORT || 5001
 app.use(cors({
     origin: [
         "http://localhost:5173",
-        "https://fitness-tracker-iota-rust.vercel.app", // your vercel URL
-        /\.vercel\.app$/  // allows all vercel preview URLs too
+        "https://fitness-tracker-c7k11fphx-harshit8.vercel.app",
+        /\.vercel\.app$/
     ],
     credentials: true
 }))
