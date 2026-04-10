@@ -23,7 +23,7 @@ const HomePage = () => {
     const [glasses, setGlasses] = useState(0)
     const [weightHistory, setWeightHistory] = useState([])
     const [startingWeight, setStartingWeight] = useState(null)
-    const [activeTab, setActiveTab] = useState("search") // "search" or "meals"
+    const [activeTab, setActiveTab] = useState("search")
     const [savedMeals, setSavedMeals] = useState([])
     const [pendingMeal, setPendingMeal] = useState(null)
     const [weightInput, setWeightInput] = useState("")

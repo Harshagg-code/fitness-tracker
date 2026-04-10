@@ -3,3 +3,56 @@
 @plugin "daisyui" {
     themes: caramellatte --default;
 }
+
+/* @plugin "daisyui/theme" {
+    name: "themeone";
+    default: true;
+
+    --color-base-100: #F4F9E9;
+    --color-base-200: #EEF0EB;
+    --color-base-300: #DDE0D8;
+    --color-base-content: #153243;
+
+    --color-primary: #284B63;
+    --color-primary-content: #FFFFFF;
+
+    --color-secondary: #B4B8AB;
+    --color-secondary-content: #153243;
+
+    --color-accent: #284B63;
+    --color-accent-content: #FFFFFF;
+
+    --color-neutral: #153243;
+    --color-neutral-content: #FFFFFF;
+
+    --color-info: #284B63;
+    --color-info-content: #FFFFFF;
+
+    --color-success: #4A7C6F;
+    --color-success-content: #FFFFFF;
+
+    --color-warning: #C4956A;
+    --color-warning-content: #153243;
+
+    --color-error: #C0574F;
+    --color-error-content: #FFFFFF;
+
+    --rounded-box: 1.5rem;
+    --rounded-btn: 1rem;
+    --rounded-badge: 1.5rem;
+}
+
+
+.card {
+    border: 1.5px solid #284B63 !important;
+    border-radius: 1.5rem !important;
+}
+
+.input,
+.select {
+    border-radius: 0.75rem !important;
+}
+
+.btn {
+    border-radius: 0.75rem !important;
+} */
