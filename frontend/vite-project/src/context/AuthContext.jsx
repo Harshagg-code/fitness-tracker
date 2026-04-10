@@ -8,14 +8,14 @@ export const AuthProvider = ({ children }) => {
     const [accessToken, setAccessToken] = useState(null)
 
     const register = async (username, email, password) => {
-        const res = await axios.post("https://fitness-tracker-y6q9.onrender.com//api/auth/register", {
+        const res = await axios.post("https://fitness-tracker-y6q9.onrender.com/api/auth/register", {
             username, email, password
         })
         return res.data
     }
 
     const login = async (email, password) => {
-        const res = await axios.post("https://fitness-tracker-y6q9.onrender.com//api/auth/login", {
+        const res = await axios.post("https://fitness-tracker-y6q9.onrender.com/api/auth/login", {
             email, password
         })
         setAccessToken(res.data.accessToken)
@@ -26,7 +26,7 @@ export const AuthProvider = ({ children }) => {
 
     const logout = async () => {
         const refreshToken = localStorage.getItem("refreshToken")
-        await axios.delete("https://fitness-tracker-y6q9.onrender.com//api/auth/logout", {
+        await axios.delete("https://fitness-tracker-y6q9.onrender.com/api/auth/logout", {
             data: { token: refreshToken }
         })
         setUser(null)
@@ -37,7 +37,7 @@ export const AuthProvider = ({ children }) => {
     const refreshAccessToken = async () => {
         const refreshToken = localStorage.getItem("refreshToken")
         if (!refreshToken) return null
-        const res = await axios.post("https://fitness-tracker-y6q9.onrender.com//api/auth/token", {
+        const res = await axios.post("https://fitness-tracker-y6q9.onrender.com/api/auth/token", {
             token: refreshToken
         })
         setAccessToken(res.data.accessToken)
