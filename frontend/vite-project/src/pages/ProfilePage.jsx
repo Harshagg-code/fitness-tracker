@@ -51,7 +51,7 @@ const ProfilePage = () => {
             )
             setCalorieGoal(res.data.calorieGoal)
             toast.success("Profile saved!")
-        } catch (error) {
+        } catch {
             toast.error("Failed to save profile")
         } finally {
             setLoading(false)

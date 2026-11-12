@@ -53,7 +53,7 @@ No test suite exists (unverified for tests elsewhere; none found).
 
 **Auth.** `POST /api/auth/login` returns `{ accessToken, refreshToken, username }`. Access token: JWT, 15 min, signed with `ACCESS_TOKEN_SECRET`. Refresh token: JWT with no expiry, signed with `REFRESH_TOKEN_SECRET`, stored on the user document and in `localStorage` (`refreshToken`). `POST /api/auth/token` swaps a valid refresh token for a new access token. `DELETE /api/auth/logout` clears it. `authenticateToken` reads `Authorization: Bearer <token>`: missing token gives 401, invalid or expired gives 403.
 
-**Frontend auth state.** `AuthContext` holds `user` (username string) and `accessToken` in memory only. Reloading the page logs the user out, because nothing restores the session from the stored refresh token (it is stored but never used on load). `ProtectedRoute` in App.jsx redirects to `/login` when `user` is null.
+**Frontend auth state.** `AuthContext` holds `user` (username string), `accessToken` and a `loading` flag in memory. On load, if a refresh token is stored, it is exchanged for a new access token and the username is read from `GET /api/profile`; `ProtectedRoute` shows a spinner while `loading`, then redirects to `/login` when `user` is null. A stored token the server rejects (401/403) is removed.
 
 **API calls.** Base URL comes from `src/api.js` (`VITE_API_URL`; set it in Vercel for production). Each page builds its own `getAuthHeaders()` and calls axios directly with full URLs. Only HomePage `handleSearch` retries once on 403 via `refreshAccessToken()`. All other calls do not refresh.
 
@@ -92,5 +92,7 @@ No test suite exists (unverified for tests elsewhere; none found).
 
 ## Known problems (not yet fixed)
 
-- Registration returns 500 on a duplicate username (only email is checked).
-- `deleteLog` and `deleteSavedMeal` do not check `userId` ownership.
+- Only HomePage `handleSearch` retries after a 403; every other call fails once the 15-minute access token expires (the session only refreshes on page load).
+- The refresh token has no expiry and is kept in `localStorage`.
+- Food-log dates use server-local days while water and weight use UTC dates.
+- ESLint still reports `react-hooks/exhaustive-deps` warnings and one `react-refresh/only-export-components` error (`useAuth` exported next to the provider).

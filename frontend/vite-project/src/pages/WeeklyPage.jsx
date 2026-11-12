@@ -14,7 +14,6 @@ const WeeklyPage = () => {
     const [weeklyLogs, setWeeklyLogs] = useState({})
     const [weightHistory, setWeightHistory] = useState([])
     const [calorieGoal, setCalorieGoal] = useState(null)
-    const [waterHistory, setWaterHistory] = useState([])
     const [aiReport, setAiReport] = useState(null)
     const [aiLoading, setAiLoading] = useState(false)
     const { accessToken, user } = useAuth()
@@ -95,7 +94,7 @@ const WeeklyPage = () => {
                 getAuthHeaders()
             )
             setAiReport(res.data.reply)
-        } catch (error) {
+        } catch {
             toast.error("Failed to get AI report")
         } finally {
             setAiLoading(false)

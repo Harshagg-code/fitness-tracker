@@ -42,7 +42,7 @@ const MealsPage = () => {
                 getAuthHeaders()  // 👈 make sure this is the third argument
             )
             setSearchResults(res.data)
-        } catch (error) {
+        } catch {
             toast.error("Failed to search food")
         } finally {
             setSearching(false)
@@ -73,7 +73,7 @@ const MealsPage = () => {
             setMealItems([])
             setCreating(false)
             fetchSavedMeals()
-        } catch (error) {
+        } catch {
             toast.error("Failed to save meal")
         }
     }
@@ -83,7 +83,7 @@ const MealsPage = () => {
             await axios.delete(`${API_URL}/api/saved-meals/${id}`, getAuthHeaders())
             toast.success("Meal deleted")
             fetchSavedMeals()
-        } catch (error) {
+        } catch {
             toast.error("Failed to delete meal")
         }
     }

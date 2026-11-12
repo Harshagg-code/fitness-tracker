@@ -129,7 +129,7 @@ const HomePage = () => {
             setPendingFood(null)
             setFoods([])
             fetchLogs()
-        } catch (error) {
+        } catch {
             toast.error("Failed to add to log")
         }
     }
@@ -139,7 +139,7 @@ const HomePage = () => {
             await axios.delete(`${API_URL}/api/logs/${id}`, getAuthHeaders())
             toast.success("Removed from log")
             fetchLogs()
-        } catch (error) {
+        } catch {
             toast.error("Failed to delete log")
         }
     }
@@ -170,7 +170,7 @@ const HomePage = () => {
             toast.success("Starting weight set!")
             setWeightInput("")
             await fetchWeight()
-        } catch (error) {
+        } catch {
             toast.error("Starting weight already set — reset history to change it")
         }
     }
@@ -198,7 +198,7 @@ const HomePage = () => {
                 getAuthHeaders()
             )
             setMessages([...updatedMessages, { role: "assistant", content: res.data.reply }])
-        } catch (error) {
+        } catch {
             toast.error("Failed to get response")
         } finally {
             setChatLoading(false)

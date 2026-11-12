@@ -20,7 +20,7 @@ const LoginPage = () => {
             await login(email, password)
             toast.success("Logged in successfully!")
             navigate("/")
-        } catch (error) {
+        } catch {
             toast.error("Invalid email or password")
         } finally {
             setLoading(false)
