@@ -28,9 +28,9 @@ const WeeklyPage = () => {
     const fetchWeeklyData = async () => {
         try {
             const [weekRes, weightRes, profileRes] = await Promise.all([
-                axios.get("https://fitness-tracker-y6q9.onrender.com/api/logs/week", getAuthHeaders()),
-                axios.get("https://fitness-tracker-y6q9.onrender.com/api/weight/history", getAuthHeaders()),
-                axios.get("https://fitness-tracker-y6q9.onrender.com/api/profile", getAuthHeaders()),
+                axios.get("http://localhost:5001/api/logs/week", getAuthHeaders()),
+                axios.get("http://localhost:5001/api/weight/history", getAuthHeaders()),
+                axios.get("http://localhost:5001/api/profile", getAuthHeaders()),
             ])
             setWeeklyLogs(weekRes.data)
             setWeightHistory(weightRes.data.dailyLogs || [])  // 👈 fallback to []
@@ -88,7 +88,7 @@ const WeeklyPage = () => {
                 - Weight history: ${weightHistory.slice(-7).map(w => `${w.date}: ${w.weight}kg`).join(", ")}
             `
             const res = await axios.post(
-                "https://fitness-tracker-y6q9.onrender.com/api/ai/advice",
+                "http://localhost:5001/api/ai/advice",
                 { messages: [{ role: "user", content: `Please give me a detailed weekly nutrition and fitness report based on this data: ${summary}` }] },
                 getAuthHeaders()
             )
@@ -114,8 +114,8 @@ const WeeklyPage = () => {
             {/* Navbar */}
             <div className="navbar bg-base-100 shadow-sm sticky top-0 z-50 px-6">
                 <div className="navbar-start">
-                    <Leaf className="w-6 h-6 text-primary mr-2" />
-                    <span className="text-xl font-bold text-primary">Fitness Tracker</span>
+                    <Leaf className="w-6 h-6 text-base-content mr-2" />
+                    <span className="text-xl font-bold text-base-content">Fitness Tracker</span>
                 </div>
                 <div className="navbar-end gap-3">
                     <button onClick={() => navigate("/")} className="btn btn-ghost btn-sm">
@@ -132,10 +132,10 @@ const WeeklyPage = () => {
                 {/* Summary Stats */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                     {[
-                        { label: "Days Tracked", value: `${daysWithData.length} / 7`, color: "text-primary" },
+                        { label: "Days Tracked", value: `${daysWithData.length} / 7`, color: "text-base-content" },
                         { label: "Avg Calories", value: `${avgCalories} kcal`, color: "text-warning" },
                         { label: "Goal Met", value: `${goalMetDays} days`, color: "text-success" },
-                        { label: "Best Day", value: bestDay ? `${bestDay.day} (${bestDay.calories} kcal)` : "—", color: "text-primary" },
+                        { label: "Best Day", value: bestDay ? `${bestDay.day} (${bestDay.calories} kcal)` : "—", color: "text-base-content" },
                     ].map((stat) => (
                         <div key={stat.label} className="card bg-base-100 shadow-sm">
                             <div className="card-body py-4 px-5">

@@ -32,9 +32,9 @@ const LoginPage = () => {
                 {/* Logo */}
                 <div className="text-center mb-8">
                     <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-2xl mb-4">
-                        <Leaf className="w-8 h-8 text-primary" />
+                        <Leaf className="w-8 h-8 text-base-content" />
                     </div>
-                    <h1 className="text-3xl font-bold text-primary">Fitness Tracker</h1>
+                    <h1 className="text-3xl font-bold text-base-content">Fitness Tracker</h1>
                     <p className="text-base-content/50 mt-1 text-sm">Welcome back — let's track your day</p>
                 </div>
 
@@ -91,7 +91,7 @@ const LoginPage = () => {
 
                         <p className="text-center text-sm text-base-content/50">
                             Don't have an account?{" "}
-                            <Link to="/register" className="text-primary font-semibold hover:underline">Register</Link>
+                            <Link to="/register" className="text-base-content font-semibold hover:underline">Register</Link>
                         </p>
                     </div>
                 </div>

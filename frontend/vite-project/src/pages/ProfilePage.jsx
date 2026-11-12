@@ -23,7 +23,7 @@ const ProfilePage = () => {
     useEffect(() => {
         const fetchProfile = async () => {
             try {
-                const res = await axios.get("https://fitness-tracker-y6q9.onrender.com/api/profile", getAuthHeaders())
+                const res = await axios.get("http://localhost:5001/api/profile", getAuthHeaders())
                 const { age, height, weight, gender, activityLevel, calorieGoal } = res.data
                 if (age) setAge(age)
                 if (height) setHeight(height)
@@ -43,7 +43,7 @@ const ProfilePage = () => {
         setLoading(true)
         try {
             const res = await axios.put(
-                "https://fitness-tracker-y6q9.onrender.com/api/profile",
+                "http://localhost:5001/api/profile",
                 { age: Number(age), height: Number(height), weight: Number(weight), gender, activityLevel },
                 getAuthHeaders()
             )
@@ -65,8 +65,8 @@ const ProfilePage = () => {
                     <ArrowLeft className="w-4 h-4" /> Back
                 </button>
                 <div className="flex items-center gap-2 ml-2">
-                    <Leaf className="w-5 h-5 text-primary" />
-                    <span className="text-lg font-bold text-primary">My Profile</span>
+                    <Leaf className="w-5 h-5 text-base-content" />
+                    <span className="text-lg font-bold text-base-content">My Profile</span>
                 </div>
             </div>
 
@@ -183,13 +183,13 @@ const ProfilePage = () => {
                     <div className="card bg-base-100 shadow-sm">
                         <div className="card-body text-center">
                             <p className="text-xs uppercase tracking-widest text-base-content/50 font-bold">Daily Maintenance Calories</p>
-                            <p className="text-6xl font-bold text-primary mt-2">{calorieGoal}</p>
+                            <p className="text-6xl font-bold text-base-content mt-2">{calorieGoal}</p>
                             <p className="text-base-content/40 text-sm">kcal / day</p>
                             <div className="divider"></div>
                             <div className="grid grid-cols-3 gap-3">
                                 {[
                                     { label: "Lose Weight", value: calorieGoal - 500, color: "text-error" },
-                                    { label: "Maintain", value: calorieGoal, color: "text-primary" },
+                                    { label: "Maintain", value: calorieGoal, color: "text-base-content" },
                                     { label: "Gain Weight", value: calorieGoal + 500, color: "text-success" },
                                 ].map((item) => (
                                     <div key={item.label} className="bg-base-200 rounded-xl p-3">

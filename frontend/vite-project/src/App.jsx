@@ -44,7 +44,7 @@ const AppRoutes = () => {
 const App = () => {
   return (
     <AuthProvider>
-      <div data-theme="caramellatte">
+      <div data-theme="fitness">
         <AppRoutes />
       </div>
     </AuthProvider>

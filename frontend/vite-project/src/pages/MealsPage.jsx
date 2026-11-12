@@ -24,7 +24,7 @@ const MealsPage = () => {
 
     const fetchSavedMeals = async () => {
         try {
-            const res = await axios.get("https://fitness-tracker-y6q9.onrender.com/api/saved-meals", getAuthHeaders())
+            const res = await axios.get("http://localhost:5001/api/saved-meals", getAuthHeaders())
             setSavedMeals(res.data)
         } catch (error) {
             console.error("Error fetching saved meals", error)
@@ -35,7 +35,7 @@ const MealsPage = () => {
         setSearching(true)
         try {
             const res = await axios.post(
-                "https://fitness-tracker-y6q9.onrender.com/api/nutrition",
+                "http://localhost:5001/api/nutrition",
                 { query },
                 getAuthHeaders()  // 👈 make sure this is the third argument
             )
@@ -62,7 +62,7 @@ const MealsPage = () => {
         if (!mealName.trim()) { toast.error("Give your meal a name!"); return }
         if (mealItems.length === 0) { toast.error("Add at least one item!"); return }
         try {
-            await axios.post("https://fitness-tracker-y6q9.onrender.com/api/saved-meals", {
+            await axios.post("http://localhost:5001/api/saved-meals", {
                 name: mealName,
                 items: mealItems
             }, getAuthHeaders())
@@ -78,7 +78,7 @@ const MealsPage = () => {
 
     const handleDeleteMeal = async (id) => {
         try {
-            await axios.delete(`https://fitness-tracker-y6q9.onrender.com/api/saved-meals/${id}`, getAuthHeaders())
+            await axios.delete(`http://localhost:5001/api/saved-meals/${id}`, getAuthHeaders())
             toast.success("Meal deleted")
             fetchSavedMeals()
         } catch (error) {
@@ -97,8 +97,8 @@ const MealsPage = () => {
             {/* Navbar */}
             <div className="navbar bg-base-100 shadow-sm sticky top-0 z-50 px-6">
                 <div className="navbar-start">
-                    <Leaf className="w-6 h-6 text-primary mr-2" />
-                    <span className="text-xl font-bold text-primary">My Meals</span>
+                    <Leaf className="w-6 h-6 text-base-content mr-2" />
+                    <span className="text-xl font-bold text-base-content">My Meals</span>
                 </div>
                 <div className="navbar-end gap-3">
                     <button onClick={() => navigate("/")} className="btn btn-ghost btn-sm">
