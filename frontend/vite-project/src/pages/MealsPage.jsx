@@ -3,7 +3,9 @@ import axios from "axios"
 import toast from "react-hot-toast"
 import { useAuth } from "../context/AuthContext"
 import Navbar from "../components/Navbar"
-import { Search, X, Plus, Trash2 } from "lucide-react"
+import { Search, X, Plus, Trash2, Utensils } from "lucide-react"
+import Card from "../components/Card"
+import MacroChips from "../components/MacroChips"
 
 const MealsPage = () => {
     const [savedMeals, setSavedMeals] = useState([])
@@ -91,174 +93,162 @@ const MealsPage = () => {
     const totalFat = mealItems.reduce((sum, item) => sum + item.fat, 0)
 
     return (
-        <div className="min-h-screen bg-base-200">
+        <div className="min-h-screen bg-base-200 pb-10">
 
             <Navbar />
 
-            <div className="max-w-4xl mx-auto px-4 py-8 flex flex-col gap-6">
+            <main className="max-w-7xl mx-auto px-4 md:px-6 py-6 flex flex-col gap-4">
 
                 {/* Header */}
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-start gap-3">
                     <div>
-                        <h1 className="text-2xl font-bold">My Meals</h1>
-                        <p className="text-sm text-base-content/50 mt-1">Save your frequently eaten meals for quick logging</p>
+                        <h1 className="text-2xl font-bold">My meals</h1>
+                        <p className="text-sm text-base-content/60 mt-1">Save meals you eat often for quick logging</p>
                     </div>
-                    {!creating && (
-                        <button onClick={() => setCreating(true)} className="btn btn-primary btn-sm">
-                            <Plus className="w-4 h-4 mr-1" /> New Meal
+                    {!creating && savedMeals.length > 0 && (
+                        <button onClick={() => setCreating(true)} className="btn btn-primary btn-sm rounded-full shrink-0">
+                            <Plus className="w-4 h-4" /> New meal
                         </button>
                     )}
                 </div>
 
-                {/* Create Meal Form */}
+                {/* Create meal */}
                 {creating && (
-                    <div className="card bg-base-100 shadow-sm">
-                        <div className="card-body gap-4">
-                            <div className="flex justify-between items-center">
-                                <h2 className="text-sm uppercase tracking-widest text-base-content/50 font-bold">Create New Meal</h2>
-                                <button onClick={() => { setCreating(false); setMealItems([]); setMealName("") }} className="btn btn-ghost btn-xs">
-                                    <X className="w-4 h-4" />
-                                </button>
-                            </div>
-
-                            {/* Meal name */}
+                    <Card
+                        title="Create meal"
+                        action={
+                            <button
+                                onClick={() => { setCreating(false); setMealItems([]); setMealName("") }}
+                                className="btn btn-ghost btn-sm btn-circle"
+                                aria-label="Close"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
+                        }
+                    >
+                        <div className="flex flex-col gap-4">
                             <input
                                 type="text"
                                 value={mealName}
                                 onChange={(e) => setMealName(e.target.value)}
-                                placeholder="Meal name (e.g. Post Workout Shake)"
-                                className="input input-bordered w-full"
+                                placeholder="Meal name (e.g. Post workout shake)"
+                                className="input w-full rounded-full bg-base-200 border-transparent"
                             />
 
-                            {/* Search food */}
                             <div className="flex gap-2">
                                 <input
                                     type="text"
                                     value={query}
                                     onChange={(e) => setQuery(e.target.value)}
                                     onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                                    placeholder="Search food to add..."
-                                    className="input input-bordered flex-1"
+                                    placeholder="Search a food to add"
+                                    className="input flex-1 min-w-0 rounded-full bg-base-200 border-transparent"
                                 />
-                                <button onClick={handleSearch} className={`btn btn-primary ${searching ? "loading" : ""}`}>
-                                    {!searching && <Search className="w-4 h-4" />}
+                                <button onClick={handleSearch} className="btn btn-primary rounded-full" aria-label="Search">
+                                    {searching ? <span className="loading loading-spinner loading-xs" /> : <Search className="w-4 h-4" />}
                                 </button>
                             </div>
 
-                            {/* Search results */}
                             {searchResults.length > 0 && (
                                 <div className="flex flex-col gap-2">
                                     {searchResults.map((food, index) => (
-                                        <div key={index} className="flex justify-between items-center p-3 bg-base-200 rounded-xl">
-                                            <div>
+                                        <div key={index} className="flex justify-between items-center gap-3 bg-base-200 rounded-field p-3">
+                                            <div className="min-w-0">
                                                 <p className="font-medium capitalize text-sm">{food.name}</p>
-                                                <p className="text-xs text-base-content/50">
-                                                    {food.calories} kcal · P: {food.protein}g · C: {food.carbs}g · F: {food.fat}g
+                                                <p className="text-xs text-base-content/60">
+                                                    {food.calories} kcal · P {food.protein}g · C {food.carbs}g · F {food.fat}g
                                                 </p>
                                             </div>
-                                            <button onClick={() => handleAddItem(food)} className="btn btn-primary btn-xs">
-                                                + Add
+                                            <button onClick={() => handleAddItem(food)} className="btn btn-neutral btn-sm rounded-full">
+                                                <Plus className="w-4 h-4" /> Add
                                             </button>
                                         </div>
                                     ))}
                                 </div>
                             )}
 
-                            {/* Added items */}
                             {mealItems.length > 0 && (
                                 <div className="flex flex-col gap-2">
-                                    <p className="text-xs uppercase tracking-widest text-base-content/50 font-bold">Items in this meal</p>
+                                    <p className="text-sm font-medium">Items in this meal</p>
                                     {mealItems.map((item, index) => (
-                                        <div key={index} className="flex justify-between items-center p-3 bg-base-200 rounded-xl">
-                                            <div>
+                                        <div key={index} className="flex justify-between items-center gap-3 bg-base-200 rounded-field p-3">
+                                            <div className="min-w-0">
                                                 <p className="font-medium capitalize text-sm">{item.name}</p>
-                                                <p className="text-xs text-base-content/50">
-                                                    {item.calories} kcal · P: {item.protein}g · C: {item.carbs}g · F: {item.fat}g
+                                                <p className="text-xs text-base-content/60">
+                                                    {item.calories} kcal · P {item.protein}g · C {item.carbs}g · F {item.fat}g
                                                 </p>
                                             </div>
-                                            <button onClick={() => handleRemoveItem(index)} className="btn btn-ghost btn-xs text-error">
-                                                <X className="w-3 h-3" />
+                                            <button onClick={() => handleRemoveItem(index)} className="btn btn-ghost btn-xs btn-circle" aria-label={`Remove ${item.name}`}>
+                                                <X className="w-4 h-4" />
                                             </button>
                                         </div>
                                     ))}
 
-                                    {/* Totals */}
-                                    <div className="grid grid-cols-4 gap-2 mt-2">
-                                        {[
-                                            { label: "Calories", value: `${totalCalories.toFixed(0)} kcal` },
-                                            { label: "Protein", value: `${totalProtein.toFixed(1)}g` },
-                                            { label: "Carbs", value: `${totalCarbs.toFixed(1)}g` },
-                                            { label: "Fat", value: `${totalFat.toFixed(1)}g` },
-                                        ].map((stat) => (
-                                            <div key={stat.label} className="bg-base-300 rounded-xl p-2 text-center">
-                                                <p className="text-xs text-base-content/50">{stat.label}</p>
-                                                <p className="font-bold text-sm">{stat.value}</p>
-                                            </div>
-                                        ))}
+                                    <div className="flex flex-wrap items-center gap-2 mt-1">
+                                        <span className="rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-content">
+                                            {totalCalories.toFixed(0)} kcal
+                                        </span>
+                                        <MacroChips protein={totalProtein} carbs={totalCarbs} fat={totalFat} />
                                     </div>
                                 </div>
                             )}
 
-                            <button onClick={handleSaveMeal} className="btn btn-primary w-full">
-                                Save Meal
+                            <button onClick={handleSaveMeal} className="btn btn-primary rounded-full w-full">
+                                Save meal
                             </button>
                         </div>
-                    </div>
+                    </Card>
                 )}
 
-                {/* Saved Meals List */}
+                {/* Empty state */}
                 {savedMeals.length === 0 && !creating && (
-                    <div className="card bg-base-100 shadow-sm">
-                        <div className="card-body items-center text-center py-12">
-                            <p className="text-base-content/40 text-sm">No saved meals yet</p>
-                            <p className="text-base-content/30 text-xs mt-1">Click "New Meal" to create your first preset meal</p>
-                        </div>
-                    </div>
+                    <Card className="items-center text-center py-12">
+                        <span className="w-12 h-12 rounded-full bg-primary text-primary-content flex items-center justify-center mb-3">
+                            <Utensils className="w-5 h-5" />
+                        </span>
+                        <p className="text-base font-semibold">No saved meals yet</p>
+                        <p className="text-sm text-base-content/60 mt-1">Create your first preset meal to log it in one tap.</p>
+                        <button onClick={() => setCreating(true)} className="btn btn-primary btn-sm rounded-full mt-4">
+                            <Plus className="w-4 h-4" /> New meal
+                        </button>
+                    </Card>
                 )}
 
-                <div className="flex flex-col gap-4">
+                {/* Saved meals */}
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 items-start">
                     {savedMeals.map((meal) => (
-                        <div key={meal._id} className="card bg-base-100 shadow-sm">
-                            <div className="card-body py-4 px-5">
-                                <div className="flex justify-between items-start">
-                                    <div>
-                                        <p className="font-semibold text-lg">{meal.name}</p>
-                                        <p className="text-xs text-base-content/40 mt-1">
-                                            {meal.items.length} item{meal.items.length !== 1 ? "s" : ""} · {meal.totalCalories.toFixed(0)} kcal
-                                        </p>
-                                    </div>
-                                    <button onClick={() => handleDeleteMeal(meal._id)} className="btn btn-ghost btn-xs text-error">
-                                        <Trash2 className="w-4 h-4" />
-                                    </button>
+                        <Card key={meal._id}>
+                            <div className="flex justify-between items-start gap-3">
+                                <div className="min-w-0">
+                                    <p className="text-base font-semibold truncate">{meal.name}</p>
+                                    <p className="text-xs text-base-content/60 mt-1">
+                                        {meal.items.length} item{meal.items.length !== 1 ? "s" : ""}
+                                    </p>
                                 </div>
-
-                                {/* Macros */}
-                                <div className="grid grid-cols-3 gap-2 mt-3">
-                                    {[
-                                        { label: "Protein", value: `${meal.totalProtein.toFixed(1)}g`, color: "text-success" },
-                                        { label: "Carbs", value: `${meal.totalCarbs.toFixed(1)}g`, color: "text-warning" },
-                                        { label: "Fat", value: `${meal.totalFat.toFixed(1)}g`, color: "text-error" },
-                                    ].map((macro) => (
-                                        <div key={macro.label} className="bg-base-200 rounded-xl p-2 text-center">
-                                            <p className="text-xs text-base-content/50">{macro.label}</p>
-                                            <p className={`font-bold text-sm ${macro.color}`}>{macro.value}</p>
-                                        </div>
-                                    ))}
-                                </div>
-
-                                {/* Items list */}
-                                <div className="flex flex-col gap-1 mt-3">
-                                    {meal.items.map((item, index) => (
-                                        <p key={index} className="text-xs text-base-content/50 capitalize">
-                                            · {item.name} — {item.calories} kcal
-                                        </p>
-                                    ))}
-                                </div>
+                                <button onClick={() => handleDeleteMeal(meal._id)} className="btn btn-ghost btn-sm btn-circle" aria-label={`Delete ${meal.name}`}>
+                                    <Trash2 className="w-4 h-4" />
+                                </button>
                             </div>
-                        </div>
+
+                            <p className="text-3xl font-bold leading-none mt-4">
+                                {meal.totalCalories.toFixed(0)}
+                                <span className="text-sm font-normal text-base-content/60 ml-1">kcal</span>
+                            </p>
+
+                            <MacroChips protein={meal.totalProtein} carbs={meal.totalCarbs} fat={meal.totalFat} className="mt-3" />
+
+                            <div className="flex flex-col mt-4">
+                                {meal.items.map((item, index) => (
+                                    <div key={index} className="flex justify-between gap-3 py-2 border-t border-base-200 text-sm">
+                                        <span className="capitalize truncate">{item.name}</span>
+                                        <span className="text-base-content/60 shrink-0">{item.calories} kcal</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </Card>
                     ))}
                 </div>
-            </div>
+            </main>
         </div>
     )
 }
