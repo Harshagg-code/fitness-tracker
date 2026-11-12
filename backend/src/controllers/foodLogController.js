@@ -1,3 +1,4 @@
+import mongoose from "mongoose"
 import FoodLog from "../models/foodLogModel.js"
 
 export async function addLog(req, res) {
@@ -47,7 +48,9 @@ export async function getLogs(req, res) {
 
 export async function deleteLog(req, res) {
     try {
-        await FoodLog.findByIdAndDelete(req.params.id)
+        if (!mongoose.isValidObjectId(req.params.id)) return res.status(404).json({ message: "Log not found" })
+        const deleted = await FoodLog.findOneAndDelete({ _id: req.params.id, userId: req.user.id })
+        if (!deleted) return res.status(404).json({ message: "Log not found" })
         res.json({ message: "Log deleted" })
     } catch (error) {
         console.log("Error in deleteLog controller", error)

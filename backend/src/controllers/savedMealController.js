@@ -1,3 +1,4 @@
+import mongoose from "mongoose"
 import SavedMeal from "../models/savedMealModel.js"
 
 export async function getSavedMeals(req, res) {
@@ -35,7 +36,9 @@ export async function createSavedMeal(req, res) {
 
 export async function deleteSavedMeal(req, res) {
     try {
-        await SavedMeal.findByIdAndDelete(req.params.id)
+        if (!mongoose.isValidObjectId(req.params.id)) return res.status(404).json({ message: "Meal not found" })
+        const deleted = await SavedMeal.findOneAndDelete({ _id: req.params.id, userId: req.user.id })
+        if (!deleted) return res.status(404).json({ message: "Meal not found" })
         res.json({ message: "Meal deleted" })
     } catch (error) {
         res.status(500).json({ message: "Internal server error" })
