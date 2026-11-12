@@ -22,7 +22,7 @@ const RegisterPage = () => {
             toast.success("Registered successfully! Please login.")
             navigate("/login")
         } catch (error) {
-            toast.error("Registration failed. Try again.")
+            toast.error(error.response?.data?.message || "Registration failed. Try again.")
         } finally {
             setLoading(false)
         }

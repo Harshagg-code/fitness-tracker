@@ -6,8 +6,8 @@ import User from "../models/userModel.js"
 export async function register(req, res) {
     const { username, email, password } = req.body
     try {
-        const existingUser = await User.findOne({ email })
-        if (existingUser) return res.status(400).json({ message: "User already exists" })
+        if (await User.findOne({ email })) return res.status(409).json({ message: "Email already registered" })
+        if (await User.findOne({ username })) return res.status(409).json({ message: "Username already taken" })
 
         const hashedPassword = await bcrypt.hash(password, 10)
         const user = new User({ username, email, password: hashedPassword })
@@ -15,6 +15,11 @@ export async function register(req, res) {
 
         res.status(201).json({ message: "User registered successfully" })
     } catch (error) {
+        // Unique index hit by a concurrent request
+        if (error.code === 11000) {
+            const field = Object.keys(error.keyPattern || {})[0]
+            return res.status(409).json({ message: field === "username" ? "Username already taken" : "Email already registered" })
+        }
         console.log("Error in register controller", error)
         res.status(500).json({ message: "Internal server error" })
     }

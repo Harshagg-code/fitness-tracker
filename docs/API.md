@@ -16,8 +16,8 @@ Base path: `/api`. JSON in and out. Local default: `http://localhost:5001`.
 ### POST /api/auth/register
 Body: `{ "username": string, "email": string, "password": string }`
 - `201 { "message": "User registered successfully" }`
-- `400 { "message": "User already exists" }` (email taken)
-- `500` on duplicate username (unique index; not handled specially) or any other error.
+- `409 { "message": "Email already registered" }` or `409 { "message": "Username already taken" }`
+- `500` on any other error.
 
 ### POST /api/auth/login
 Body: `{ "email": string, "password": string }`
