@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import axios from "axios"
 import toast from "react-hot-toast"
 import { useAuth } from "../context/AuthContext"
@@ -38,6 +38,9 @@ const HomePage = () => {
     const [weightInput, setWeightInput] = useState("")
     const [dailyWeightInput, setDailyWeightInput] = useState("")
     const GOAL = 8
+    const glassesRef = useRef(0)
+    const confirmedGlassesRef = useRef(0)
+    const waterQueueRef = useRef(Promise.resolve())
     const { accessToken, refreshAccessToken, user } = useAuth()
     const navigate = useNavigate()
 
@@ -70,6 +73,8 @@ const HomePage = () => {
     const fetchWater = async () => {
         try {
             const res = await axios.get(`${API_URL}/api/water`, getAuthHeaders())
+            glassesRef.current = res.data.glasses
+            confirmedGlassesRef.current = res.data.glasses
             setGlasses(res.data.glasses)
         } catch (error) {
             console.error("Error fetching water", error)
@@ -139,14 +144,23 @@ const HomePage = () => {
         }
     }
 
-    const handleGlassClick = async (index) => {
-        const newGlasses = index < glasses ? index : index + 1
-        try {
-            await axios.post(`${API_URL}/api/water`, { glasses: newGlasses }, getAuthHeaders())
-            setGlasses(newGlasses)
-        } catch (error) {
-            toast.error("Failed to update water")
-        }
+    // Water: update the UI immediately and send saves one at a time, in order,
+    // so rapid clicks neither lose updates nor arrive out of order.
+    const changeGlasses = (delta) => {
+        const next = Math.min(GOAL, Math.max(0, glassesRef.current + delta))
+        if (next === glassesRef.current) return
+        glassesRef.current = next
+        setGlasses(next)
+        waterQueueRef.current = waterQueueRef.current.then(async () => {
+            try {
+                await axios.post(`${API_URL}/api/water`, { glasses: next }, getAuthHeaders())
+                confirmedGlassesRef.current = next
+            } catch {
+                toast.error("Failed to update water")
+                glassesRef.current = confirmedGlassesRef.current
+                setGlasses(confirmedGlassesRef.current)
+            }
+        })
     }
 
     const handleSetStartingWeight = async () => {
@@ -337,8 +351,8 @@ const HomePage = () => {
                             glasses={glasses}
                             goal={GOAL}
                             mlPerGlass={ML_PER_GLASS}
-                            onAdd={() => glasses < GOAL && handleGlassClick(glasses)}
-                            onRemove={() => handleGlassClick(glasses - 2)}
+                            onAdd={() => changeGlasses(1)}
+                            onRemove={() => changeGlasses(-1)}
                         />
                         <WeightCard
                             startingWeight={startingWeight}
