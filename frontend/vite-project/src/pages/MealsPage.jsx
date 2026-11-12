@@ -2,8 +2,8 @@ import { useState, useEffect } from "react"
 import axios from "axios"
 import toast from "react-hot-toast"
 import { useAuth } from "../context/AuthContext"
-import { useNavigate } from "react-router-dom"
-import { Leaf, ArrowLeft, Search, X, Plus, Trash2 } from "lucide-react"
+import Navbar from "../components/Navbar"
+import { Search, X, Plus, Trash2 } from "lucide-react"
 
 const MealsPage = () => {
     const [savedMeals, setSavedMeals] = useState([])
@@ -13,8 +13,7 @@ const MealsPage = () => {
     const [searchResults, setSearchResults] = useState([])
     const [searching, setSearching] = useState(false)
     const [creating, setCreating] = useState(false)
-    const { accessToken, logout } = useAuth()
-    const navigate = useNavigate()
+    const { accessToken } = useAuth()
 
     useEffect(() => { fetchSavedMeals() }, [])
 
@@ -94,19 +93,7 @@ const MealsPage = () => {
     return (
         <div className="min-h-screen bg-base-200">
 
-            {/* Navbar */}
-            <div className="navbar bg-base-100 shadow-sm sticky top-0 z-50 px-6">
-                <div className="navbar-start">
-                    <Leaf className="w-6 h-6 text-base-content mr-2" />
-                    <span className="text-xl font-bold text-base-content">My Meals</span>
-                </div>
-                <div className="navbar-end gap-3">
-                    <button onClick={() => navigate("/")} className="btn btn-ghost btn-sm">
-                        <ArrowLeft className="w-4 h-4 mr-1" /> Home
-                    </button>
-                    <button onClick={logout} className="btn btn-error btn-sm btn-outline">Logout</button>
-                </div>
-            </div>
+            <Navbar />
 
             <div className="max-w-4xl mx-auto px-4 py-8 flex flex-col gap-6">
 

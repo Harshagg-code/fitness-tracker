@@ -2,8 +2,8 @@ import { useState, useEffect } from "react"
 import axios from "axios"
 import toast from "react-hot-toast"
 import { useAuth } from "../context/AuthContext"
-import { useNavigate } from "react-router-dom"
-import { ArrowLeft, User, Ruler, Weight, Activity, Save, Leaf } from "lucide-react"
+import Navbar from "../components/Navbar"
+import { User, Ruler, Weight, Activity, Save } from "lucide-react"
 
 const ProfilePage = () => {
     const [age, setAge] = useState("")
@@ -14,7 +14,6 @@ const ProfilePage = () => {
     const [calorieGoal, setCalorieGoal] = useState(null)
     const [loading, setLoading] = useState(false)
     const { accessToken } = useAuth()
-    const navigate = useNavigate()
 
     const getAuthHeaders = () => ({
         headers: { Authorization: `Bearer ${accessToken}` }
@@ -59,16 +58,7 @@ const ProfilePage = () => {
     return (
         <div className="min-h-screen bg-base-200">
 
-            {/* Navbar */}
-            <div className="navbar bg-base-100 shadow-sm sticky top-0 z-50 px-6">
-                <button onClick={() => navigate("/")} className="btn btn-ghost btn-sm gap-1">
-                    <ArrowLeft className="w-4 h-4" /> Back
-                </button>
-                <div className="flex items-center gap-2 ml-2">
-                    <Leaf className="w-5 h-5 text-base-content" />
-                    <span className="text-lg font-bold text-base-content">My Profile</span>
-                </div>
-            </div>
+            <Navbar />
 
             <div className="max-w-md mx-auto px-4 py-8 flex flex-col gap-6">
 
