@@ -6,6 +6,7 @@ import Navbar from "../components/Navbar"
 import { Calendar, Ruler, Weight, Save, ArrowDown, ArrowUp, Minus } from "lucide-react"
 import Card from "../components/Card"
 import FormField from "../components/FormField"
+import { API_URL } from "../api"
 
 const ProfilePage = () => {
     const [age, setAge] = useState("")
@@ -24,7 +25,7 @@ const ProfilePage = () => {
     useEffect(() => {
         const fetchProfile = async () => {
             try {
-                const res = await axios.get("http://localhost:5001/api/profile", getAuthHeaders())
+                const res = await axios.get(`${API_URL}/api/profile`, getAuthHeaders())
                 const { age, height, weight, gender, activityLevel, calorieGoal } = res.data
                 if (age) setAge(age)
                 if (height) setHeight(height)
@@ -44,7 +45,7 @@ const ProfilePage = () => {
         setLoading(true)
         try {
             const res = await axios.put(
-                "http://localhost:5001/api/profile",
+                `${API_URL}/api/profile`,
                 { age: Number(age), height: Number(height), weight: Number(weight), gender, activityLevel },
                 getAuthHeaders()
             )

@@ -59,7 +59,11 @@ npm run dev              # http://localhost:5173
 | `CALORIE_NINJAS_API_KEY` | Calorie Ninjas API key |
 | `ANTHROPIC_API_KEY` | Anthropic API key |
 
-`frontend/vite-project/.env` is not read by the code yet; the API URL is currently hardcoded. See `frontend/.env.example` for the planned variable.
+`frontend/vite-project/.env`
+
+| Name | Purpose |
+| --- | --- |
+| `VITE_API_URL` | Backend base URL, no trailing slash (defaults to `http://localhost:5001`). Set it in Vercel for production, e.g. the Render URL. |
 
 ## Project structure
 

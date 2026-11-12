@@ -8,6 +8,7 @@ import ReactMarkdown from "react-markdown"
 import { Bot, CalendarCheck, Flame, Target, Trophy } from "lucide-react"
 import Card from "../components/Card"
 import StatTile from "../components/StatTile"
+import { API_URL } from "../api"
 
 const WeeklyPage = () => {
     const [weeklyLogs, setWeeklyLogs] = useState({})
@@ -29,9 +30,9 @@ const WeeklyPage = () => {
     const fetchWeeklyData = async () => {
         try {
             const [weekRes, weightRes, profileRes] = await Promise.all([
-                axios.get("http://localhost:5001/api/logs/week", getAuthHeaders()),
-                axios.get("http://localhost:5001/api/weight/history", getAuthHeaders()),
-                axios.get("http://localhost:5001/api/profile", getAuthHeaders()),
+                axios.get(`${API_URL}/api/logs/week`, getAuthHeaders()),
+                axios.get(`${API_URL}/api/weight/history`, getAuthHeaders()),
+                axios.get(`${API_URL}/api/profile`, getAuthHeaders()),
             ])
             setWeeklyLogs(weekRes.data)
             setWeightHistory(weightRes.data.dailyLogs || [])  // 👈 fallback to []
@@ -89,7 +90,7 @@ const WeeklyPage = () => {
                 - Weight history: ${weightHistory.slice(-7).map(w => `${w.date}: ${w.weight}kg`).join(", ")}
             `
             const res = await axios.post(
-                "http://localhost:5001/api/ai/advice",
+                `${API_URL}/api/ai/advice`,
                 { messages: [{ role: "user", content: `Please give me a detailed weekly nutrition and fitness report based on this data: ${summary}` }] },
                 getAuthHeaders()
             )

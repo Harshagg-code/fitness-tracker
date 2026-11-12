@@ -55,7 +55,7 @@ No test suite exists (unverified for tests elsewhere; none found).
 
 **Frontend auth state.** `AuthContext` holds `user` (username string) and `accessToken` in memory only. Reloading the page logs the user out, because nothing restores the session from the stored refresh token (it is stored but never used on load). `ProtectedRoute` in App.jsx redirects to `/login` when `user` is null.
 
-**API calls.** Each page builds its own `getAuthHeaders()` and calls axios directly with full URLs. Only HomePage `handleSearch` retries once on 403 via `refreshAccessToken()`. All other calls do not refresh.
+**API calls.** Base URL comes from `src/api.js` (`VITE_API_URL`; set it in Vercel for production). Each page builds its own `getAuthHeaders()` and calls axios directly with full URLs. Only HomePage `handleSearch` retries once on 403 via `refreshAccessToken()`. All other calls do not refresh.
 
 **Calorie goal.** `PUT /api/profile` computes `calorieGoal` with Harris-Benedict plus an activity multiplier and stores it on the user.
 
@@ -85,13 +85,12 @@ No test suite exists (unverified for tests elsewhere; none found).
 ## Don't
 
 - Don't commit secrets or read/print `.env` values. `.env` is in the root `.gitignore` (covers `backend/.env` and `frontend/vite-project/.env`).
-- Don't hardcode new API URLs in components. Route new calls through a shared base URL (see "Known problems" below).
+- Don't hardcode API URLs. Import `API_URL` from `src/api.js` (reads `VITE_API_URL`, falls back to `http://localhost:5001`, no trailing slash) and build URLs as `` `${API_URL}/api/...` ``.
 - Don't change the DaisyUI theme in only one place.
 - Don't add sleep, steps or heart-rate features; the app tracks calories, macros, water, weight and meals only.
 - Don't import `services/nutritionService.js` or `models/foodModel.js` (legacy).
 
 ## Known problems (not yet fixed)
 
-- All API URLs are hardcoded strings; they currently point at `http://localhost:5001` in the working tree and at the Render URL in the last commit.
 - Registration returns 500 on a duplicate username (only email is checked).
 - `deleteLog` and `deleteSavedMeal` do not check `userId` ownership.

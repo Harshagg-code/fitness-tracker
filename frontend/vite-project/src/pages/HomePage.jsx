@@ -13,6 +13,7 @@ import MealSection from "../components/home/MealSection"
 import WaterCard from "../components/home/WaterCard"
 import WeightCard from "../components/home/WeightCard"
 import ChatWidget from "../components/home/ChatWidget"
+import { API_URL } from "../api"
 
 const HomePage = () => {
     const [query, setQuery] = useState("")
@@ -54,8 +55,8 @@ const HomePage = () => {
     const fetchLogs = async () => {
         try {
             const [logsRes, profileRes] = await Promise.all([
-                axios.get("http://localhost:5001/api/logs", getAuthHeaders()),
-                axios.get("http://localhost:5001/api/profile", getAuthHeaders())
+                axios.get(`${API_URL}/api/logs`, getAuthHeaders()),
+                axios.get(`${API_URL}/api/profile`, getAuthHeaders())
             ])
             setLogs(logsRes.data.logs)
             setGrouped(logsRes.data.grouped)
@@ -68,7 +69,7 @@ const HomePage = () => {
 
     const fetchWater = async () => {
         try {
-            const res = await axios.get("http://localhost:5001/api/water", getAuthHeaders())
+            const res = await axios.get(`${API_URL}/api/water`, getAuthHeaders())
             setGlasses(res.data.glasses)
         } catch (error) {
             console.error("Error fetching water", error)
@@ -77,7 +78,7 @@ const HomePage = () => {
 
     const fetchWeight = async () => {
         try {
-            const res = await axios.get("http://localhost:5001/api/weight/history", getAuthHeaders())
+            const res = await axios.get(`${API_URL}/api/weight/history`, getAuthHeaders())
             setWeightHistory(res.data.dailyLogs || [])
             setStartingWeight(res.data.startingWeight)
         } catch (error) {
@@ -90,7 +91,7 @@ const HomePage = () => {
         setLoading(true)
         try {
             const response = await axios.post(
-                "http://localhost:5001/api/nutrition",
+                `${API_URL}/api/nutrition`,
                 { query },
                 { headers: { Authorization: `Bearer ${accessToken}` } }
             )
@@ -101,7 +102,7 @@ const HomePage = () => {
                 const newToken = await refreshAccessToken()
                 if (newToken) {
                     const response = await axios.post(
-                        "http://localhost:5001/api/nutrition",
+                        `${API_URL}/api/nutrition`,
                         { query },
                         { headers: { Authorization: `Bearer ${newToken}` } }
                     )
@@ -118,7 +119,7 @@ const HomePage = () => {
 
     const handleAddToLog = async (food, mealType) => {
         try {
-            await axios.post("http://localhost:5001/api/logs", { ...food, mealType }, getAuthHeaders())
+            await axios.post(`${API_URL}/api/logs`, { ...food, mealType }, getAuthHeaders())
             toast.success(`${food.name} added to ${mealType}`)
             setPendingFood(null)
             setFoods([])
@@ -130,7 +131,7 @@ const HomePage = () => {
 
     const handleDeleteLog = async (id) => {
         try {
-            await axios.delete(`http://localhost:5001/api/logs/${id}`, getAuthHeaders())
+            await axios.delete(`${API_URL}/api/logs/${id}`, getAuthHeaders())
             toast.success("Removed from log")
             fetchLogs()
         } catch (error) {
@@ -141,7 +142,7 @@ const HomePage = () => {
     const handleGlassClick = async (index) => {
         const newGlasses = index < glasses ? index : index + 1
         try {
-            await axios.post("http://localhost:5001/api/water", { glasses: newGlasses }, getAuthHeaders())
+            await axios.post(`${API_URL}/api/water`, { glasses: newGlasses }, getAuthHeaders())
             setGlasses(newGlasses)
         } catch (error) {
             toast.error("Failed to update water")
@@ -151,7 +152,7 @@ const HomePage = () => {
     const handleSetStartingWeight = async () => {
         if (!weightInput) return
         try {
-            await axios.post("http://localhost:5001/api/weight/start", { weight: parseFloat(weightInput) }, getAuthHeaders())
+            await axios.post(`${API_URL}/api/weight/start`, { weight: parseFloat(weightInput) }, getAuthHeaders())
             toast.success("Starting weight set!")
             setWeightInput("")
             await fetchWeight()
@@ -162,7 +163,7 @@ const HomePage = () => {
 
     const fetchSavedMeals = async () => {
         try {
-            const res = await axios.get("http://localhost:5001/api/saved-meals", getAuthHeaders())
+            const res = await axios.get(`${API_URL}/api/saved-meals`, getAuthHeaders())
             setSavedMeals(res.data)
         } catch (error) {
             console.error("Error fetching saved meals", error)
@@ -178,7 +179,7 @@ const HomePage = () => {
         setChatLoading(true)
         try {
             const res = await axios.post(
-                "http://localhost:5001/api/ai/advice",
+                `${API_URL}/api/ai/advice`,
                 { messages: updatedMessages },
                 getAuthHeaders()
             )
@@ -192,7 +193,7 @@ const HomePage = () => {
 
     // Handlers moved out of inline JSX (bodies unchanged)
     const handleAddSavedMeal = async (meal, mealType) => {
-        await axios.post("http://localhost:5001/api/logs", {
+        await axios.post(`${API_URL}/api/logs`, {
             name: meal.name,
             calories: meal.totalCalories,
             protein: meal.totalProtein,
@@ -206,7 +207,7 @@ const HomePage = () => {
     }
 
     const handleResetWeight = async () => {
-        await axios.delete("http://localhost:5001/api/weight/reset", getAuthHeaders())
+        await axios.delete(`${API_URL}/api/weight/reset`, getAuthHeaders())
         setWeightHistory([])
         setStartingWeight(null)
         toast.success("Weight history cleared")
@@ -214,7 +215,7 @@ const HomePage = () => {
 
     const handleLogWeight = async () => {
         if (!dailyWeightInput) return
-        await axios.post("http://localhost:5001/api/weight", { weight: parseFloat(dailyWeightInput) }, getAuthHeaders())
+        await axios.post(`${API_URL}/api/weight`, { weight: parseFloat(dailyWeightInput) }, getAuthHeaders())
         toast.success("Weight logged!")
         setDailyWeightInput("")
         fetchWeight()
