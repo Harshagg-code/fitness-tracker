@@ -3,7 +3,9 @@ import axios from "axios"
 import toast from "react-hot-toast"
 import { useAuth } from "../context/AuthContext"
 import Navbar from "../components/Navbar"
-import { User, Ruler, Weight, Activity, Save } from "lucide-react"
+import { Calendar, Ruler, Weight, Save, ArrowDown, ArrowUp, Minus } from "lucide-react"
+import Card from "../components/Card"
+import FormField from "../components/FormField"
 
 const ProfilePage = () => {
     const [age, setAge] = useState("")
@@ -56,95 +58,66 @@ const ProfilePage = () => {
     }
 
     return (
-        <div className="min-h-screen bg-base-200">
+        <div className="min-h-screen bg-base-200 pb-10">
 
             <Navbar />
 
-            <div className="max-w-md mx-auto px-4 py-8 flex flex-col gap-6">
+            <main className="max-w-7xl mx-auto px-4 md:px-6 py-6 flex flex-col gap-4">
 
-                {/* Form */}
-                <div className="card bg-base-100 shadow-sm">
-                    <div className="card-body gap-5">
-                        <h2 className="text-sm uppercase tracking-widest text-base-content/50 font-bold">Your Details</h2>
+                <div>
+                    <h1 className="text-2xl font-bold">Profile</h1>
+                    <p className="text-sm text-base-content/60 mt-1">Your details set your daily calorie goal</p>
+                </div>
 
-                        {/* Age */}
-                        <div className="form-control">
-                            <label className="label pb-1">
-                                <span className="label-text font-medium text-xs uppercase tracking-widest text-base-content/50">Age</span>
-                            </label>
-                            <label className="input input-bordered flex items-center gap-2">
-                                <User className="w-4 h-4 text-base-content/40" />
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+
+                    {/* Details form */}
+                    <Card title="Your details">
+                        <div className="flex flex-col gap-4">
+                            <FormField label="Age" icon={Calendar} unit="yrs">
                                 <input
                                     type="number"
                                     placeholder="25"
-                                    className="grow"
+                                    className="grow min-w-0"
                                     value={age}
                                     onChange={(e) => setAge(e.target.value)}
                                 />
-                                <span className="text-xs text-base-content/30">yrs</span>
-                            </label>
-                        </div>
+                            </FormField>
 
-                        {/* Height */}
-                        <div className="form-control">
-                            <label className="label pb-1">
-                                <span className="label-text font-medium text-xs uppercase tracking-widest text-base-content/50">Height</span>
-                            </label>
-                            <label className="input input-bordered flex items-center gap-2">
-                                <Ruler className="w-4 h-4 text-base-content/40" />
+                            <FormField label="Height" icon={Ruler} unit="cm">
                                 <input
                                     type="number"
                                     placeholder="175"
-                                    className="grow"
+                                    className="grow min-w-0"
                                     value={height}
                                     onChange={(e) => setHeight(e.target.value)}
                                 />
-                                <span className="text-xs text-base-content/30">cm</span>
-                            </label>
-                        </div>
+                            </FormField>
 
-                        {/* Weight */}
-                        <div className="form-control">
-                            <label className="label pb-1">
-                                <span className="label-text font-medium text-xs uppercase tracking-widest text-base-content/50">Weight</span>
-                            </label>
-                            <label className="input input-bordered flex items-center gap-2">
-                                <Weight className="w-4 h-4 text-base-content/40" />
+                            <FormField label="Weight" icon={Weight} unit="kg">
                                 <input
                                     type="number"
                                     placeholder="70"
-                                    className="grow"
+                                    className="grow min-w-0"
                                     value={weight}
                                     onChange={(e) => setWeight(e.target.value)}
                                 />
-                                <span className="text-xs text-base-content/30">kg</span>
-                            </label>
-                        </div>
+                            </FormField>
 
-                        {/* Gender */}
-                        <div className="form-control">
-                            <label className="label pb-1">
-                                <span className="label-text font-medium text-xs uppercase tracking-widest text-base-content/50">Gender</span>
-                            </label>
-                            <select
-                                className="select select-bordered"
-                                value={gender}
-                                onChange={(e) => setGender(e.target.value)}
-                            >
-                                <option value="male">Male</option>
-                                <option value="female">Female</option>
-                            </select>
-                        </div>
-
-                        {/* Activity Level */}
-                        <div className="form-control">
-                            <label className="label pb-1">
-                                <span className="label-text font-medium text-xs uppercase tracking-widest text-base-content/50">Activity Level</span>
-                            </label>
-                            <label className="input input-bordered flex items-center gap-2 h-auto py-2">
-                                <Activity className="w-4 h-4 text-base-content/40 shrink-0" />
+                            <FormField label="Gender" bare>
                                 <select
-                                    className="grow bg-transparent border-none outline-none text-sm"
+                                    className="select w-full rounded-full bg-base-200 border-transparent"
+                                    value={gender}
+                                    onChange={(e) => setGender(e.target.value)}
+                                >
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                </select>
+                            </FormField>
+
+                            <FormField label="Activity level" bare>
+                                <select
+                                    className="select w-full rounded-full bg-base-200 border-transparent"
                                     value={activityLevel}
                                     onChange={(e) => setActivityLevel(e.target.value)}
                                 >
@@ -152,47 +125,46 @@ const ProfilePage = () => {
                                     <option value="light">Light (1-3 days/week)</option>
                                     <option value="moderate">Moderate (3-5 days/week)</option>
                                     <option value="active">Active (6-7 days/week)</option>
-                                    <option value="very_active">Very Active (hard exercise daily)</option>
+                                    <option value="very_active">Very active (hard exercise daily)</option>
                                 </select>
-                            </label>
-                        </div>
+                            </FormField>
 
-                        {/* Save Button */}
-                        <button
-                            onClick={handleSave}
-                            className={`btn btn-primary w-full mt-1 ${loading ? "loading" : ""}`}
-                        >
-                            {!loading && <Save className="w-4 h-4 mr-1" />}
-                            {loading ? "Saving..." : "Save Profile"}
-                        </button>
-                    </div>
+                            <button onClick={handleSave} className="btn btn-primary rounded-full w-full mt-1">
+                                {loading ? <span className="loading loading-spinner loading-xs" /> : <Save className="w-4 h-4" />}
+                                {loading ? "Saving" : "Save profile"}
+                            </button>
+                        </div>
+                    </Card>
+
+                    {/* Calorie result */}
+                    <Card title="Daily maintenance calories">
+                        {calorieGoal ? (
+                            <>
+                                <p className="text-5xl font-bold leading-none">
+                                    {calorieGoal}
+                                    <span className="text-sm font-normal text-base-content/60 ml-2">kcal / day</span>
+                                </p>
+                                <div className="grid grid-cols-3 gap-3 mt-6">
+                                    {[
+                                        { label: "Lose", value: calorieGoal - 500, icon: ArrowDown, tint: "bg-base-200" },
+                                        { label: "Maintain", value: calorieGoal, icon: Minus, tint: "bg-primary/30" },
+                                        { label: "Gain", value: calorieGoal + 500, icon: ArrowUp, tint: "bg-base-200" },
+                                    ].map((item) => (
+                                        <div key={item.label} className={`${item.tint} rounded-field p-4`}>
+                                            <item.icon className="w-4 h-4 mb-3" />
+                                            <p className="text-xs text-base-content/60">{item.label}</p>
+                                            <p className="text-xl font-bold mt-1 leading-none">{item.value}</p>
+                                            <p className="text-xs text-base-content/60 mt-1">kcal</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </>
+                        ) : (
+                            <p className="text-sm text-base-content/60">Save your details to see your daily calorie goal.</p>
+                        )}
+                    </Card>
                 </div>
-
-                {/* Calorie Result */}
-                {calorieGoal && (
-                    <div className="card bg-base-100 shadow-sm">
-                        <div className="card-body text-center">
-                            <p className="text-xs uppercase tracking-widest text-base-content/50 font-bold">Daily Maintenance Calories</p>
-                            <p className="text-6xl font-bold text-base-content mt-2">{calorieGoal}</p>
-                            <p className="text-base-content/40 text-sm">kcal / day</p>
-                            <div className="divider"></div>
-                            <div className="grid grid-cols-3 gap-3">
-                                {[
-                                    { label: "Lose Weight", value: calorieGoal - 500, color: "text-error" },
-                                    { label: "Maintain", value: calorieGoal, color: "text-base-content" },
-                                    { label: "Gain Weight", value: calorieGoal + 500, color: "text-success" },
-                                ].map((item) => (
-                                    <div key={item.label} className="bg-base-200 rounded-xl p-3">
-                                        <p className="text-xs text-base-content/50 mb-1">{item.label}</p>
-                                        <p className={`font-bold text-lg ${item.color}`}>{item.value}</p>
-                                        <p className="text-xs text-base-content/40">kcal</p>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                )}
-            </div>
+            </main>
         </div>
     )
 }
