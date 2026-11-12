@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import axios from "axios"
+import api from "../api"
 import toast from "react-hot-toast"
 import { useAuth } from "../context/AuthContext"
 import Navbar from "../components/Navbar"
@@ -8,7 +8,6 @@ import ReactMarkdown from "react-markdown"
 import { Bot, CalendarCheck, Flame, Target, Trophy } from "lucide-react"
 import Card from "../components/Card"
 import StatTile from "../components/StatTile"
-import { API_URL } from "../api"
 
 const WeeklyPage = () => {
     const [weeklyLogs, setWeeklyLogs] = useState({})
@@ -16,22 +15,18 @@ const WeeklyPage = () => {
     const [calorieGoal, setCalorieGoal] = useState(null)
     const [aiReport, setAiReport] = useState(null)
     const [aiLoading, setAiLoading] = useState(false)
-    const { accessToken, user } = useAuth()
+    const { user } = useAuth()
 
     useEffect(() => {
         fetchWeeklyData()
     }, [])
 
-    const getAuthHeaders = () => ({
-        headers: { Authorization: `Bearer ${accessToken}` }
-    })
-
     const fetchWeeklyData = async () => {
         try {
             const [weekRes, weightRes, profileRes] = await Promise.all([
-                axios.get(`${API_URL}/api/logs/week`, getAuthHeaders()),
-                axios.get(`${API_URL}/api/weight/history`, getAuthHeaders()),
-                axios.get(`${API_URL}/api/profile`, getAuthHeaders()),
+                api.get("/api/logs/week"),
+                api.get("/api/weight/history"),
+                api.get("/api/profile"),
             ])
             setWeeklyLogs(weekRes.data)
             setWeightHistory(weightRes.data.dailyLogs || [])  // 👈 fallback to []
@@ -88,10 +83,9 @@ const WeeklyPage = () => {
                 - Daily breakdown: ${chartData.map(d => `${d.day}: ${d.calories} kcal`).join(", ")}
                 - Weight history: ${weightHistory.slice(-7).map(w => `${w.date}: ${w.weight}kg`).join(", ")}
             `
-            const res = await axios.post(
-                `${API_URL}/api/ai/advice`,
-                { messages: [{ role: "user", content: `Please give me a detailed weekly nutrition and fitness report based on this data: ${summary}` }] },
-                getAuthHeaders()
+            const res = await api.post(
+                "/api/ai/advice",
+                { messages: [{ role: "user", content: `Please give me a detailed weekly nutrition and fitness report based on this data: ${summary}` }] }
             )
             setAiReport(res.data.reply)
         } catch {

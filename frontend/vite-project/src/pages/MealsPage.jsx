@@ -1,12 +1,10 @@
 import { useState, useEffect } from "react"
-import axios from "axios"
+import api from "../api"
 import toast from "react-hot-toast"
-import { useAuth } from "../context/AuthContext"
 import Navbar from "../components/Navbar"
 import { Search, X, Plus, Trash2, Utensils } from "lucide-react"
 import Card from "../components/Card"
 import MacroChips from "../components/MacroChips"
-import { API_URL } from "../api"
 
 const MealsPage = () => {
     const [savedMeals, setSavedMeals] = useState([])
@@ -16,17 +14,12 @@ const MealsPage = () => {
     const [searchResults, setSearchResults] = useState([])
     const [searching, setSearching] = useState(false)
     const [creating, setCreating] = useState(false)
-    const { accessToken } = useAuth()
 
     useEffect(() => { fetchSavedMeals() }, [])
 
-    const getAuthHeaders = () => ({
-        headers: { Authorization: `Bearer ${accessToken}` }
-    })
-
     const fetchSavedMeals = async () => {
         try {
-            const res = await axios.get(`${API_URL}/api/saved-meals`, getAuthHeaders())
+            const res = await api.get("/api/saved-meals")
             setSavedMeals(res.data)
         } catch (error) {
             console.error("Error fetching saved meals", error)
@@ -36,10 +29,9 @@ const MealsPage = () => {
         if (!query.trim()) return
         setSearching(true)
         try {
-            const res = await axios.post(
-                `${API_URL}/api/nutrition`,
-                { query },
-                getAuthHeaders()  // 👈 make sure this is the third argument
+            const res = await api.post(
+                "/api/nutrition",
+                { query }
             )
             setSearchResults(res.data)
         } catch {
@@ -64,10 +56,10 @@ const MealsPage = () => {
         if (!mealName.trim()) { toast.error("Give your meal a name!"); return }
         if (mealItems.length === 0) { toast.error("Add at least one item!"); return }
         try {
-            await axios.post(`${API_URL}/api/saved-meals`, {
+            await api.post("/api/saved-meals", {
                 name: mealName,
                 items: mealItems
-            }, getAuthHeaders())
+            })
             toast.success("Meal saved!")
             setMealName("")
             setMealItems([])
@@ -80,7 +72,7 @@ const MealsPage = () => {
 
     const handleDeleteMeal = async (id) => {
         try {
-            await axios.delete(`${API_URL}/api/saved-meals/${id}`, getAuthHeaders())
+            await api.delete(`/api/saved-meals/${id}`)
             toast.success("Meal deleted")
             fetchSavedMeals()
         } catch {

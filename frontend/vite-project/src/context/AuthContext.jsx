@@ -1,34 +1,44 @@
 import { createContext, useContext, useState, useEffect } from "react"
+import { useNavigate } from "react-router-dom"
 import axios from "axios"
-import { API_URL } from "../api"
+import api, { API_URL, setAccessToken, setAuthFailureHandler, refreshAccessToken } from "../api"
 
 const AuthContext = createContext()
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null)
-    const [accessToken, setAccessToken] = useState(null)
     // True while a stored refresh token is being exchanged for a session on page load
     const [loading, setLoading] = useState(() => !!localStorage.getItem("refreshToken"))
+    const navigate = useNavigate()
+
+    const clearSession = () => {
+        setAccessToken(null)
+        setUser(null)
+        localStorage.removeItem("refreshToken")
+    }
+
+    // If a token refresh fails mid-session, log the user out and go to /login
+    useEffect(() => {
+        setAuthFailureHandler(() => {
+            clearSession()
+            navigate("/login")
+        })
+    }, [navigate])
 
     useEffect(() => {
-        const refreshToken = localStorage.getItem("refreshToken")
-        if (!refreshToken) return
+        if (!localStorage.getItem("refreshToken")) return
         let cancelled = false
 
         const restoreSession = async () => {
             try {
-                const tokenRes = await axios.post(`${API_URL}/api/auth/token`, { token: refreshToken })
-                const newToken = tokenRes.data.accessToken
-                const profileRes = await axios.get(`${API_URL}/api/profile`, {
-                    headers: { Authorization: `Bearer ${newToken}` }
-                })
+                await refreshAccessToken()
+                const profileRes = await api.get("/api/profile")
                 if (cancelled) return
-                setAccessToken(newToken)
                 setUser(profileRes.data.username)
             } catch (err) {
                 // Drop the stored token only if the server rejected it, not on network errors
                 if (err.response && [401, 403].includes(err.response.status)) {
-                    localStorage.removeItem("refreshToken")
+                    clearSession()
                 }
             } finally {
                 if (!cancelled) setLoading(false)
@@ -61,34 +71,14 @@ export const AuthProvider = ({ children }) => {
         await axios.delete(`${API_URL}/api/auth/logout`, {
             data: { token: refreshToken }
         })
-        setUser(null)
-        setAccessToken(null)
-        localStorage.removeItem("refreshToken")
-    }
-
-    const refreshAccessToken = async () => {
-        const refreshToken = localStorage.getItem("refreshToken")
-        if (!refreshToken) return null
-        const res = await axios.post(`${API_URL}/api/auth/token`, {
-            token: refreshToken
-        })
-        setAccessToken(res.data.accessToken)
-        return res.data.accessToken
+        clearSession()
     }
 
     return (
-        <AuthContext.Provider value={{ user, accessToken, loading, register, login, logout, refreshAccessToken }}>
+        <AuthContext.Provider value={{ user, loading, register, login, logout }}>
             {children}
         </AuthContext.Provider>
     )
 }
 
 export const useAuth = () => useContext(AuthContext)
-
-
-
-
-
-
-
-// Harris-Benedict Equation

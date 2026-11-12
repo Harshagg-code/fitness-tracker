@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react"
-import axios from "axios"
+import api from "../api"
 import toast from "react-hot-toast"
 import { useAuth } from "../context/AuthContext"
 import Navbar from "../components/Navbar"
@@ -13,7 +13,6 @@ import MealSection from "../components/home/MealSection"
 import WaterCard from "../components/home/WaterCard"
 import WeightCard from "../components/home/WeightCard"
 import ChatWidget from "../components/home/ChatWidget"
-import { API_URL } from "../api"
 
 const HomePage = () => {
     const [query, setQuery] = useState("")
@@ -41,7 +40,7 @@ const HomePage = () => {
     const glassesRef = useRef(0)
     const confirmedGlassesRef = useRef(0)
     const waterQueueRef = useRef(Promise.resolve())
-    const { accessToken, refreshAccessToken, user } = useAuth()
+    const { user } = useAuth()
     const navigate = useNavigate()
 
     useEffect(() => {
@@ -51,15 +50,11 @@ const HomePage = () => {
         fetchSavedMeals()
     }, [])
 
-    const getAuthHeaders = () => ({
-        headers: { Authorization: `Bearer ${accessToken}` }
-    })
-
     const fetchLogs = async () => {
         try {
             const [logsRes, profileRes] = await Promise.all([
-                axios.get(`${API_URL}/api/logs`, getAuthHeaders()),
-                axios.get(`${API_URL}/api/profile`, getAuthHeaders())
+                api.get("/api/logs"),
+                api.get("/api/profile")
             ])
             setLogs(logsRes.data.logs)
             setGrouped(logsRes.data.grouped)
@@ -72,7 +67,7 @@ const HomePage = () => {
 
     const fetchWater = async () => {
         try {
-            const res = await axios.get(`${API_URL}/api/water`, getAuthHeaders())
+            const res = await api.get("/api/water")
             glassesRef.current = res.data.glasses
             confirmedGlassesRef.current = res.data.glasses
             setGlasses(res.data.glasses)
@@ -83,7 +78,7 @@ const HomePage = () => {
 
     const fetchWeight = async () => {
         try {
-            const res = await axios.get(`${API_URL}/api/weight/history`, getAuthHeaders())
+            const res = await api.get("/api/weight/history")
             setWeightHistory(res.data.dailyLogs || [])
             setStartingWeight(res.data.startingWeight)
         } catch (error) {
@@ -95,28 +90,11 @@ const HomePage = () => {
         if (!query.trim()) { toast.error("Please enter a food query"); return }
         setLoading(true)
         try {
-            const response = await axios.post(
-                `${API_URL}/api/nutrition`,
-                { query },
-                { headers: { Authorization: `Bearer ${accessToken}` } }
-            )
+            const response = await api.post("/api/nutrition", { query })
             setFoods(response.data)
             toast.success("Nutrition data loaded")
-        } catch (error) {
-            if (error.response?.status === 403) {
-                const newToken = await refreshAccessToken()
-                if (newToken) {
-                    const response = await axios.post(
-                        `${API_URL}/api/nutrition`,
-                        { query },
-                        { headers: { Authorization: `Bearer ${newToken}` } }
-                    )
-                    setFoods(response.data)
-                    toast.success("Nutrition data loaded")
-                }
-            } else {
-                toast.error("Failed to fetch nutrition data")
-            }
+        } catch {
+            toast.error("Failed to fetch nutrition data")
         } finally {
             setLoading(false)
         }
@@ -124,7 +102,7 @@ const HomePage = () => {
 
     const handleAddToLog = async (food, mealType) => {
         try {
-            await axios.post(`${API_URL}/api/logs`, { ...food, mealType }, getAuthHeaders())
+            await api.post("/api/logs", { ...food, mealType })
             toast.success(`${food.name} added to ${mealType}`)
             setPendingFood(null)
             setFoods([])
@@ -136,7 +114,7 @@ const HomePage = () => {
 
     const handleDeleteLog = async (id) => {
         try {
-            await axios.delete(`${API_URL}/api/logs/${id}`, getAuthHeaders())
+            await api.delete(`/api/logs/${id}`)
             toast.success("Removed from log")
             fetchLogs()
         } catch {
@@ -153,7 +131,7 @@ const HomePage = () => {
         setGlasses(next)
         waterQueueRef.current = waterQueueRef.current.then(async () => {
             try {
-                await axios.post(`${API_URL}/api/water`, { glasses: next }, getAuthHeaders())
+                await api.post("/api/water", { glasses: next })
                 confirmedGlassesRef.current = next
             } catch {
                 toast.error("Failed to update water")
@@ -166,7 +144,7 @@ const HomePage = () => {
     const handleSetStartingWeight = async () => {
         if (!weightInput) return
         try {
-            await axios.post(`${API_URL}/api/weight/start`, { weight: parseFloat(weightInput) }, getAuthHeaders())
+            await api.post("/api/weight/start", { weight: parseFloat(weightInput) })
             toast.success("Starting weight set!")
             setWeightInput("")
             await fetchWeight()
@@ -177,7 +155,7 @@ const HomePage = () => {
 
     const fetchSavedMeals = async () => {
         try {
-            const res = await axios.get(`${API_URL}/api/saved-meals`, getAuthHeaders())
+            const res = await api.get("/api/saved-meals")
             setSavedMeals(res.data)
         } catch (error) {
             console.error("Error fetching saved meals", error)
@@ -192,10 +170,9 @@ const HomePage = () => {
         setChatInput("")
         setChatLoading(true)
         try {
-            const res = await axios.post(
-                `${API_URL}/api/ai/advice`,
-                { messages: updatedMessages },
-                getAuthHeaders()
+            const res = await api.post(
+                "/api/ai/advice",
+                { messages: updatedMessages }
             )
             setMessages([...updatedMessages, { role: "assistant", content: res.data.reply }])
         } catch {
@@ -207,21 +184,21 @@ const HomePage = () => {
 
     // Handlers moved out of inline JSX (bodies unchanged)
     const handleAddSavedMeal = async (meal, mealType) => {
-        await axios.post(`${API_URL}/api/logs`, {
+        await api.post("/api/logs", {
             name: meal.name,
             calories: meal.totalCalories,
             protein: meal.totalProtein,
             carbs: meal.totalCarbs,
             fat: meal.totalFat,
             mealType
-        }, getAuthHeaders())
+        })
         toast.success(`${meal.name} added to ${mealType}!`)
         setPendingMeal(null)
         fetchLogs()
     }
 
     const handleResetWeight = async () => {
-        await axios.delete(`${API_URL}/api/weight/reset`, getAuthHeaders())
+        await api.delete("/api/weight/reset")
         setWeightHistory([])
         setStartingWeight(null)
         toast.success("Weight history cleared")
@@ -229,7 +206,7 @@ const HomePage = () => {
 
     const handleLogWeight = async () => {
         if (!dailyWeightInput) return
-        await axios.post(`${API_URL}/api/weight`, { weight: parseFloat(dailyWeightInput) }, getAuthHeaders())
+        await api.post("/api/weight", { weight: parseFloat(dailyWeightInput) })
         toast.success("Weight logged!")
         setDailyWeightInput("")
         fetchWeight()

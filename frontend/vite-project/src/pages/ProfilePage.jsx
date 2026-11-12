@@ -1,12 +1,10 @@
 import { useState, useEffect } from "react"
-import axios from "axios"
+import api from "../api"
 import toast from "react-hot-toast"
-import { useAuth } from "../context/AuthContext"
 import Navbar from "../components/Navbar"
 import { Calendar, Ruler, Weight, Save, ArrowDown, ArrowUp, Minus } from "lucide-react"
 import Card from "../components/Card"
 import FormField from "../components/FormField"
-import { API_URL } from "../api"
 
 const ProfilePage = () => {
     const [age, setAge] = useState("")
@@ -16,16 +14,11 @@ const ProfilePage = () => {
     const [activityLevel, setActivityLevel] = useState("sedentary")
     const [calorieGoal, setCalorieGoal] = useState(null)
     const [loading, setLoading] = useState(false)
-    const { accessToken } = useAuth()
-
-    const getAuthHeaders = () => ({
-        headers: { Authorization: `Bearer ${accessToken}` }
-    })
 
     useEffect(() => {
         const fetchProfile = async () => {
             try {
-                const res = await axios.get(`${API_URL}/api/profile`, getAuthHeaders())
+                const res = await api.get("/api/profile")
                 const { age, height, weight, gender, activityLevel, calorieGoal } = res.data
                 if (age) setAge(age)
                 if (height) setHeight(height)
@@ -44,10 +37,9 @@ const ProfilePage = () => {
         if (!age || !height || !weight) { toast.error("Please fill in all fields"); return }
         setLoading(true)
         try {
-            const res = await axios.put(
-                `${API_URL}/api/profile`,
-                { age: Number(age), height: Number(height), weight: Number(weight), gender, activityLevel },
-                getAuthHeaders()
+            const res = await api.put(
+                "/api/profile",
+                { age: Number(age), height: Number(height), weight: Number(weight), gender, activityLevel }
             )
             setCalorieGoal(res.data.calorieGoal)
             toast.success("Profile saved!")
