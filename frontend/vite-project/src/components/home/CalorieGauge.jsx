@@ -9,7 +9,7 @@ const CalorieGauge = ({ consumed, goal, onSetup }) => {
     return (
         <Card title="Calories" className="h-full">
             {goal ? (
-                <div className="flex flex-col gap-5">
+                <div className="flex flex-col gap-5 my-auto">
                     <div className="relative w-full max-w-xs mx-auto">
                         <svg viewBox="0 0 200 108" className="w-full h-auto">
                             <path

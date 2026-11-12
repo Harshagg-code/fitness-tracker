@@ -242,7 +242,7 @@ const HomePage = () => {
         { label: "Protein", intake: totalProtein, goal: targets.protein, unit: "g", decimals: 1, dot: "bg-primary", fill: "text-primary", stack: true },
         { label: "Carbs", intake: totalCarbs, goal: targets.carbs, unit: "g", decimals: 1, dot: "bg-neutral", fill: "text-neutral", stack: true },
         { label: "Fat", intake: totalFat, goal: targets.fat, unit: "g", decimals: 1, dot: "bg-warning", fill: "text-warning", stack: true },
-        { label: "Calories", intake: totalCalories, goal: calorieGoal, unit: " kcal", decimals: 0, dot: "bg-base-300", fill: "", stack: false },
+        { label: "Calories", intake: totalCalories, goal: calorieGoal, unit: " kcal", decimals: 0, dot: "bg-base-content/30", fill: "", stack: false },
     ]
 
     const meals = [
