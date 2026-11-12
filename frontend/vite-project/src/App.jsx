@@ -8,7 +8,14 @@ import WeeklyPage from "./pages/WeeklyPage"
 import MealsPage from "./pages/MealsPage"
 
 const ProtectedRoute = ({ children }) => {
-  const { user } = useAuth()
+  const { user, loading } = useAuth()
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-base-200 flex items-center justify-center">
+        <span className="loading loading-spinner loading-lg"></span>
+      </div>
+    )
+  }
   return user ? children : <Navigate to="/login" />
 }
 
