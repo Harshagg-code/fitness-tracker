@@ -5,7 +5,9 @@ import { useAuth } from "../context/AuthContext"
 import Navbar from "../components/Navbar"
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, ReferenceLine } from "recharts"
 import ReactMarkdown from "react-markdown"
-import { Bot } from "lucide-react"
+import { Bot, CalendarCheck, Flame, Target, Trophy } from "lucide-react"
+import Card from "../components/Card"
+import StatTile from "../components/StatTile"
 
 const WeeklyPage = () => {
     const [weeklyLogs, setWeeklyLogs] = useState({})
@@ -99,173 +101,156 @@ const WeeklyPage = () => {
         }
     }
 
+    const todayStr = chartData[chartData.length - 1].date
+
     const CustomBar = (props) => {
-        const { x, y, width, height, calories } = props
-        const color = calorieGoal
-            ? calories > calorieGoal ? "#ef4444" : calories > 0 ? "#22c55e" : "#e5e7eb"
-            : "#C4A882"
-        return <rect x={x} y={y} width={width} height={height} fill={color} rx={4} />
+        const { x, y, width, height, calories, date } = props
+        const isToday = date === todayStr
+        const color = isToday
+            ? (calorieGoal && calories > calorieGoal ? "#FF4B3E" : "#D4F04A")
+            : "rgba(255,255,255,0.22)"
+        return <rect x={x} y={y} width={width} height={height} fill={color} rx={6} />
     }
 
     return (
-        <div className="min-h-screen bg-base-200">
+        <div className="min-h-screen bg-base-200 pb-10">
 
             <Navbar />
 
-            <div className="max-w-6xl mx-auto px-4 py-8 flex flex-col gap-6">
+            <main className="max-w-7xl mx-auto px-4 md:px-6 py-6 flex flex-col gap-4">
 
-                <h1 className="text-2xl font-bold">Weekly Overview</h1>
-
-                {/* Summary Stats */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                    {[
-                        { label: "Days Tracked", value: `${daysWithData.length} / 7`, color: "text-base-content" },
-                        { label: "Avg Calories", value: `${avgCalories} kcal`, color: "text-warning" },
-                        { label: "Goal Met", value: `${goalMetDays} days`, color: "text-success" },
-                        { label: "Best Day", value: bestDay ? `${bestDay.day} (${bestDay.calories} kcal)` : "—", color: "text-base-content" },
-                    ].map((stat) => (
-                        <div key={stat.label} className="card bg-base-100 shadow-sm">
-                            <div className="card-body py-4 px-5">
-                                <p className="text-xs uppercase tracking-widest text-base-content/50">{stat.label}</p>
-                                <p className={`text-lg font-bold mt-1 ${stat.color}`}>{stat.value}</p>
-                            </div>
-                        </div>
-                    ))}
+                <div>
+                    <h1 className="text-2xl font-bold">Weekly overview</h1>
+                    <p className="text-sm text-base-content/60 mt-1">Your last 7 days of calories and weight</p>
                 </div>
 
-                {/* Two column layout */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Summary tiles */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <StatTile icon={CalendarCheck} label="Days tracked" value={daysWithData.length} unit="/ 7" sub="Days with food logged" />
+                    <StatTile icon={Flame} label="Avg calories" value={avgCalories} unit="kcal" sub="Per tracked day" />
+                    <StatTile icon={Target} label="Goal met" value={goalMetDays} unit="days" sub={calorieGoal ? `At or under ${calorieGoal} kcal` : "Set a calorie goal in Profile"} />
+                    <StatTile
+                        icon={Trophy}
+                        label="Best day"
+                        value={bestDay ? bestDay.day : "-"}
+                        sub={bestDay ? `${bestDay.calories} kcal` : "No data yet"}
+                    />
+                </div>
 
-                    {/* Calorie Bar Chart */}
-                    <div className="card bg-base-100 shadow-sm">
-                        <div className="card-body">
-                            <h2 className="text-sm uppercase tracking-widest text-base-content/50 font-bold mb-4">
-                                Calories This Week
-                            </h2>
-                            {daysWithData.length === 0 ? (
-                                <p className="text-base-content/40 text-sm">No data logged this week yet</p>
-                            ) : (
-                                <>
-                                    <ResponsiveContainer width="100%" height={220}>
-                                        <BarChart data={chartData} barSize={32}>
-                                            <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 12 }} />
-                                            <YAxis hide />
-                                            <Tooltip
-                                                formatter={(value) => [`${value} kcal`, "Calories"]}
-                                                contentStyle={{ borderRadius: "8px", border: "none", boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}
-                                            />
-                                            {calorieGoal && <ReferenceLine y={calorieGoal} stroke="#C4A882" strokeDasharray="4 4" />}
-                                            <Bar dataKey="calories" shape={<CustomBar />} />
-                                        </BarChart>
-                                    </ResponsiveContainer>
-                                    <div className="flex gap-4 mt-2">
-                                        <span className="flex items-center gap-1 text-xs text-base-content/50">
-                                            <span className="w-3 h-3 rounded-sm bg-green-500 inline-block"></span> Under goal
-                                        </span>
-                                        <span className="flex items-center gap-1 text-xs text-base-content/50">
-                                            <span className="w-3 h-3 rounded-sm bg-red-500 inline-block"></span> Over goal
-                                        </span>
-                                        {calorieGoal && (
-                                            <span className="flex items-center gap-1 text-xs text-base-content/50">
-                                                <span className="w-6 border-t-2 border-dashed border-[#C4A882] inline-block"></span> Goal
-                                            </span>
-                                        )}
-                                    </div>
-                                </>
-                            )}
+                {/* Chart (dark) + weight */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+                    <section className="lg:col-span-7 card bg-neutral text-neutral-content rounded-box p-5">
+                        <div className="flex items-center justify-between gap-3 mb-4">
+                            <h2 className="text-base font-semibold">Calories this week</h2>
+                            <div className="flex items-center gap-3 text-xs text-neutral-content/60">
+                                <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-primary inline-block"></span> Today</span>
+                                {calorieGoal && (
+                                    <span className="flex items-center gap-1"><span className="w-5 border-t-2 border-dashed border-primary inline-block"></span> Goal</span>
+                                )}
+                            </div>
                         </div>
-                    </div>
+                        {daysWithData.length === 0 ? (
+                            <p className="text-sm text-neutral-content/60">No data logged this week yet</p>
+                        ) : (
+                            <ResponsiveContainer width="100%" height={260}>
+                                <BarChart data={chartData} barSize={32}>
+                                    <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "#A3A3A3" }} />
+                                    <YAxis hide domain={[0, (max) => Math.max(max, calorieGoal || 0)]} />
+                                    <Tooltip
+                                        cursor={false}
+                                        formatter={(value) => [`${value} kcal`, "Calories"]}
+                                        contentStyle={{ borderRadius: "12px", border: "none", color: "#111111" }}
+                                    />
+                                    {calorieGoal && <ReferenceLine y={calorieGoal} stroke="#D4F04A" strokeDasharray="4 4" />}
+                                    <Bar dataKey="calories" shape={<CustomBar />} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        )}
+                    </section>
 
-                    {/* Weight Line Chart */}
-                    <div className="card bg-base-100 shadow-sm">
-                        <div className="card-body">
-                            <h2 className="text-sm uppercase tracking-widest text-base-content/50 font-bold mb-4">
-                                Weight Trend
-                            </h2>
+                    <div className="lg:col-span-5">
+                        <Card title="Weight trend">
                             {weightHistory.length < 2 ? (
-                                <p className="text-base-content/40 text-sm">Log your weight for at least 2 days to see a trend</p>
+                                <p className="text-sm text-base-content/60">Log your weight for at least 2 days to see a trend</p>
                             ) : (
-                                <ResponsiveContainer width="100%" height={220}>
+                                <ResponsiveContainer width="100%" height={260}>
                                     <LineChart data={getWeightChartData()}>
-                                        <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 12 }} />
+                                        <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "#6B6B6B" }} />
                                         <YAxis
                                             domain={["auto", "auto"]}
                                             axisLine={false}
                                             tickLine={false}
-                                            tick={{ fontSize: 12 }}
+                                            tick={{ fontSize: 12, fill: "#6B6B6B" }}
                                             tickFormatter={(v) => `${v}kg`}
                                         />
-                                        <Tooltip formatter={(value) => [`${value}kg`, "Weight"]} contentStyle={{ borderRadius: "8px", border: "none" }} />
+                                        <Tooltip formatter={(value) => [`${value}kg`, "Weight"]} contentStyle={{ borderRadius: "12px", border: "none" }} />
                                         <Line
                                             type="monotone"
                                             dataKey="weight"
-                                            stroke="#D94F1E"
+                                            stroke="#111111"
                                             strokeWidth={2}
-                                            dot={{ fill: "#D94F1E", r: 4 }}
+                                            dot={{ fill: "#D4F04A", stroke: "#111111", strokeWidth: 2, r: 4 }}
                                             activeDot={{ r: 6 }}
                                         />
                                     </LineChart>
                                 </ResponsiveContainer>
                             )}
-                        </div>
+                        </Card>
                     </div>
                 </div>
 
-                {/* Daily Breakdown */}
-                <div className="card bg-base-100 shadow-sm">
-                    <div className="card-body">
-                        <h2 className="text-sm uppercase tracking-widest text-base-content/50 font-bold mb-4">Daily Breakdown</h2>
-                        <div className="flex flex-col gap-2">
-                            {chartData.map((day) => (
-                                <div key={day.date} className="flex items-center gap-4">
-                                    <p className="text-sm font-semibold w-10">{day.day}</p>
-                                    <div className="flex-1 bg-base-200 rounded-full h-3 overflow-hidden">
-                                        <div
-                                            className="h-full rounded-full transition-all"
-                                            style={{
-                                                width: calorieGoal ? `${Math.min((day.calories / calorieGoal) * 100, 100)}%` : "0%",
-                                                backgroundColor: day.calories > calorieGoal ? "#ef4444" : "#22c55e"
-                                            }}
+                {/* Breakdown + AI report */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+                    <div className="lg:col-span-5">
+                        <Card title="Daily breakdown">
+                            <div className="flex flex-col gap-3">
+                                {chartData.map((day) => (
+                                    <div key={day.date} className="flex items-center gap-3">
+                                        <p className="text-sm font-medium w-9">{day.day}</p>
+                                        <progress
+                                            className={`progress flex-1 ${calorieGoal && day.calories > calorieGoal ? "progress-error" : "progress-neutral"}`}
+                                            value={calorieGoal ? Math.min((day.calories / calorieGoal) * 100, 100) : 0}
+                                            max="100"
                                         />
+                                        <p className="text-sm text-base-content/60 w-20 text-right">
+                                            {day.calories > 0 ? `${day.calories} kcal` : "-"}
+                                        </p>
                                     </div>
-                                    <p className="text-sm text-base-content/50 w-24 text-right">
-                                        {day.calories > 0 ? `${day.calories} kcal` : "—"}
-                                    </p>
+                                ))}
+                            </div>
+                        </Card>
+                    </div>
+
+                    <div className="lg:col-span-7">
+                        <Card
+                            title="AI weekly report"
+                            action={
+                                <button
+                                    onClick={getAIReport}
+                                    className="btn btn-primary btn-sm rounded-full"
+                                    disabled={aiLoading || daysWithData.length === 0}
+                                >
+                                    {aiLoading ? <span className="loading loading-spinner loading-xs" /> : <Bot className="w-4 h-4" />}
+                                    {aiLoading ? "Analyzing" : "Generate report"}
+                                </button>
+                            }
+                        >
+                            {aiReport ? (
+                                <div className="bg-base-200 rounded-field p-4 text-sm leading-relaxed">
+                                    <ReactMarkdown>{aiReport}</ReactMarkdown>
                                 </div>
-                            ))}
-                        </div>
+                            ) : (
+                                <p className="text-sm text-base-content/60">
+                                    {daysWithData.length === 0
+                                        ? "Log some food this week to generate a report"
+                                        : "Get personalized feedback on your week"}
+                                </p>
+                            )}
+                        </Card>
                     </div>
                 </div>
 
-                {/* AI Weekly Report */}
-                <div className="card bg-base-100 shadow-sm">
-                    <div className="card-body">
-                        <div className="flex justify-between items-center">
-                            <div>
-                                <h2 className="text-sm uppercase tracking-widest text-base-content/50 font-bold">AI Weekly Report</h2>
-                                <p className="text-xs text-base-content/40 mt-1">Get personalized feedback on your week</p>
-                            </div>
-                            <button
-                                onClick={getAIReport}
-                                className={`btn btn-primary btn-sm ${aiLoading ? "loading" : ""}`}
-                                disabled={aiLoading || daysWithData.length === 0}
-                            >
-                                {!aiLoading && <Bot className="w-4 h-4 mr-1" />}
-                                {aiLoading ? "Analyzing..." : "Generate Report"}
-                            </button>
-                        </div>
-                        {aiReport && (
-                            <div className="mt-4 p-4 bg-base-200 rounded-xl text-sm leading-relaxed">
-                                <ReactMarkdown>{aiReport}</ReactMarkdown>
-                            </div>
-                        )}
-                        {!aiReport && !aiLoading && daysWithData.length === 0 && (
-                            <p className="text-xs text-base-content/30 mt-3">Log some food this week to generate a report</p>
-                        )}
-                    </div>
-                </div>
-
-            </div>
+            </main>
         </div>
     )
 }
