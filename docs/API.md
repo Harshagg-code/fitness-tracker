@@ -97,7 +97,7 @@ Auth: yes. Body: `{ "weight": number }`. `200` the created document. `400 { "mes
 Auth: yes. Body: `{ "weight": number }`. Upserts today's `daily` entry. `200` the document.
 
 ### GET /api/weight/history
-Auth: yes. `200 { "startingWeight": WeightDoc | null, "dailyLogs": WeightDoc[] }`. `dailyLogs` sorted by date ascending, limited to 30. Note: `.limit(30)` is applied after an ascending sort, so once more than 30 days exist this returns the 30 oldest, not the newest (unverified against a real dataset; follows from the query).
+Auth: yes. `200 { "startingWeight": WeightDoc | null, "dailyLogs": WeightDoc[] }`. `dailyLogs` holds the newest 30 daily entries, ordered oldest to newest.
 
 ### DELETE /api/weight/reset
 Auth: yes. Deletes all of the user's weight documents (start and daily). `200 { "message": "Weight history cleared" }`.

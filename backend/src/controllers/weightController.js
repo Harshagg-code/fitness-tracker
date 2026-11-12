@@ -21,9 +21,11 @@ export async function logWeight(req, res) {
 export async function getWeightHistory(req, res) {
     try {
         const startingWeight = await Weight.findOne({ userId: req.user.id, type: "start" })
-        const dailyLogs = await Weight.find({ userId: req.user.id, type: "daily" })
-            .sort({ date: 1 })
+        // Newest 30 daily logs, returned oldest to newest
+        const newestLogs = await Weight.find({ userId: req.user.id, type: "daily" })
+            .sort({ date: -1 })
             .limit(30)
+        const dailyLogs = newestLogs.reverse()
         res.json({ startingWeight, dailyLogs })
     } catch (error) {
         console.error("Error in getWeightHistory", error)
