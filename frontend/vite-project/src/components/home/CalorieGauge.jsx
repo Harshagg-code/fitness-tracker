@@ -7,7 +7,7 @@ const CalorieGauge = ({ consumed, goal, onSetup }) => {
     const remaining = goal ? goal - consumed : 0
 
     return (
-        <Card title="Calories" className="h-full">
+        <Card title="Calories">
             {goal ? (
                 <div className="flex flex-col gap-5 my-auto">
                     <div className="relative w-full max-w-xs mx-auto">

@@ -5,7 +5,7 @@ import { useAuth } from "../context/AuthContext"
 import Navbar from "../components/Navbar"
 import { useNavigate } from "react-router-dom"
 import { Flame, Droplets, Scale, Beef } from "lucide-react"
-import StatTile from "../components/home/StatTile"
+import StatTile from "../components/StatTile"
 import CalorieGauge from "../components/home/CalorieGauge"
 import MacroTable from "../components/home/MacroTable"
 import FoodSearchCard from "../components/home/FoodSearchCard"
@@ -297,7 +297,7 @@ const HomePage = () => {
                 </div>
 
                 {/* Gauge + analysis */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
                     <div className="lg:col-span-5">
                         <CalorieGauge consumed={totalCalories} goal={calorieGoal} onSetup={() => navigate("/profile")} />
                     </div>

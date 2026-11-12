@@ -5,7 +5,7 @@ const MacroTable = ({ rows }) => {
     const total = macros.reduce((sum, r) => sum + r.intake, 0)
 
     return (
-        <Card title="Calories Analysis" className="h-full">
+        <Card title="Calories Analysis">
             {/* Stacked share bar */}
             <div className="h-2 rounded-full overflow-hidden bg-base-200 mb-4">
                 <svg viewBox="0 0 100 8" preserveAspectRatio="none" className="w-full h-full block">
