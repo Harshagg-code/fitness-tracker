@@ -84,8 +84,15 @@ More detail: [docs/API.md](docs/API.md), [docs/DESIGN.md](docs/DESIGN.md).
 
 ## Screenshots
 
-_Add screenshots here._
+<img src="photos/123.png" width="900" alt="Dashboard" />
 
+| Weekly overview | Meals |
+|---|---|
+| <img src="photos/1234.png" alt="Weekly" /> | <img src="photos/12345.png" alt="Meals" /> |
+
+| Profile | Login |
+|---|---|
+| <img src="photos/123456.png" alt="Profile" /> | <img src="photos/1234567.png" alt="Login" /> |
 ## Live demo
 
 _Add link here._
