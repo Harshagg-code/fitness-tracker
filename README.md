@@ -1,3 +1,4 @@
+![Backend tests](https://github.com/Harshagg-code/fitness-tracker/actions/workflows/backend-tests.yml/badge.svg)
 # Fitness Tracker
 
 A full-stack nutrition tracker built with the MERN stack. Search foods in plain language ("2 eggs and 1 cup rice"), log them into meals, track calories, macros, water and weight against a calorie goal calculated from your profile, review your week, and ask an AI coach for advice based on what you actually ate today.
