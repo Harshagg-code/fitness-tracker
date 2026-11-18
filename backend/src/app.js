@@ -8,6 +8,8 @@ import aiRoutes from "./routes/aiRoutes.js"
 import waterRoutes from "./routes/waterRoutes.js"
 import weightRoutes from "./routes/weightRoutes.js"
 import savedMealRoutes from "./routes/savedMealRoutes.js"
+import statsRoutes from "./routes/statsRoutes.js"
+
 
 const app = express()
 
@@ -28,5 +30,5 @@ app.use("/api", aiRoutes)
 app.use("/api", waterRoutes)
 app.use("/api", weightRoutes)
 app.use("/api", savedMealRoutes)
-
+app.use("/api", statsRoutes)
 export default app

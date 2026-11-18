@@ -10,9 +10,8 @@ import Card from "../components/Card"
 import StatTile from "../components/StatTile"
 
 const WeeklyPage = () => {
-    const [weeklyLogs, setWeeklyLogs] = useState({})
+    const [stats, setStats] = useState(null)
     const [weightHistory, setWeightHistory] = useState([])
-    const [calorieGoal, setCalorieGoal] = useState(null)
     const [aiReport, setAiReport] = useState(null)
     const [aiLoading, setAiLoading] = useState(false)
     const { user } = useAuth()
@@ -23,32 +22,20 @@ const WeeklyPage = () => {
 
     const fetchWeeklyData = async () => {
         try {
-            const [weekRes, weightRes, profileRes] = await Promise.all([
-                api.get("/api/logs/week"),
+            const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
+            const [statsRes, weightRes] = await Promise.all([
+                api.get("/api/stats/weekly", { params: { tz } }),
                 api.get("/api/weight/history"),
-                api.get("/api/profile"),
             ])
-            setWeeklyLogs(weekRes.data)
-            setWeightHistory(weightRes.data.dailyLogs || [])  // 👈 fallback to []
-            setCalorieGoal(profileRes.data.calorieGoal)
+            setStats(statsRes.data)
+            setWeightHistory(weightRes.data.dailyLogs || [])
         } catch (error) {
             console.error("Error fetching weekly data", error)
         }
     }
 
     // Build last 7 days array
-    const getLast7Days = () => {
-        const days = []
-        for (let i = 6; i >= 0; i--) {
-            const date = new Date()
-            date.setDate(date.getDate() - i)
-            const dateStr = date.toISOString().split("T")[0]
-            const dayName = date.toLocaleDateString("en-US", { weekday: "short" })
-            const calories = weeklyLogs[dateStr]?.totalCalories || 0
-            days.push({ date: dateStr, day: dayName, calories })
-        }
-        return days
-    }
+
 
     const getWeightChartData = () => {
         return weightHistory.slice(-7).map(log => ({
@@ -57,19 +44,19 @@ const WeeklyPage = () => {
         }))
     }
 
-    const chartData = getLast7Days()
+    const calorieGoal = stats?.calorieGoal ?? null
 
-    // Weekly stats
+    const chartData = (stats?.daily ?? []).map(d => ({
+        ...d,
+        day: new Date(`${d.date}T12:00:00`).toLocaleDateString("en-US", { weekday: "short" })
+    }))
+
     const daysWithData = chartData.filter(d => d.calories > 0)
-    const avgCalories = daysWithData.length > 0
-        ? Math.round(daysWithData.reduce((sum, d) => sum + d.calories, 0) / daysWithData.length)
-        : 0
-    const bestDay = daysWithData.length > 0
-        ? daysWithData.reduce((best, d) => d.calories > best.calories ? d : best, daysWithData[0])
+    const avgCalories = stats?.summary.avgCalories ?? 0
+    const bestDay = stats?.summary.bestDay
+        ? chartData.find(d => d.date === stats.summary.bestDay)
         : null
-    const goalMetDays = calorieGoal
-        ? daysWithData.filter(d => d.calories <= calorieGoal).length
-        : 0
+    const goalMetDays = stats?.summary.goalMetDays ?? 0
 
     const getAIReport = async () => {
         setAiLoading(true)
@@ -95,7 +82,7 @@ const WeeklyPage = () => {
         }
     }
 
-    const todayStr = chartData[chartData.length - 1].date
+    const todayStr = chartData[chartData.length - 1]?.date
 
     const CustomBar = (props) => {
         const { x, y, width, height, calories, date } = props
