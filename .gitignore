@@ -5,3 +5,4 @@ frontend/vite-project/.env
 dist/
 build/
 .DS_Store
+backend/coverage/
